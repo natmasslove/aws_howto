@@ -1,0 +1,65 @@
+Parameters:
+  GlueConnAZ:
+    Description: Availability Zone Glue connection refers to
+    Type: String
+  GlueConnSecurityGroup:
+    Description: Security Group for Glue connection
+    Type: String
+  GlueConnSubnetId:
+    Description: Subnet for Glue connection
+    Type: String
+  GlueIAMRoleArn:
+    Description: IAM Role for Glue Job
+    Type: String
+
+Resources:
+  SecretGlueSAP:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: 'awstips/glue/sap'
+      SecretString: !Sub |
+        {
+          "sap_host"     : "__PUT_SAP_URL_HERE__",
+          "sap_port"     : "__PUT_PORT_HERE__",
+          "sap_username" : "__PUT_USERNAME_HERE__",
+          "sap_password" : "__PUT_PASSWORD_HERE__"
+        }
+
+  GlueConnectionSAP:
+    Type: AWS::Glue::Connection
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      ConnectionInput: 
+        Description: "sample-sap-connection"
+        ConnectionType: "CUSTOM"
+        PhysicalConnectionRequirements:
+          AvailabilityZone: !Ref GlueConnAZ
+          SecurityGroupIdList: 
+           - !Ref GlueConnSecurityGroup
+          SubnetId: !Ref GlueConnSubnetId
+        ConnectionProperties:
+          "CONNECTOR_CLASS_NAME": "com.sap.db.jdbc.Driver"
+          "CONNECTOR_TYPE": "Jdbc"
+          "CONNECTOR_URL": "s3://s3-awstips-glueconn-804071151415-glue/jdbc_drivers/ngdbc-2.12.9.jar"
+          "JDBC_CONNECTION_URL": jdbc:sap://${sap_host}:${sap_port}/?user=${sap_username}&password=${sap_password}
+          "SECRET_ID": !Ref SecretGlueSAP
+        Name: 'glueconn-awstips-sap'
+
+  GlueJobSAPSample:
+    Type: AWS::Glue::Job
+    Properties:
+      Command:
+        Name: "glueetl"
+        PythonVersion: 3
+        ScriptLocation: !Sub 's3://s3-awstips-glueconn-804071151415-glue/scripts/sample_sap_job.py'
+      ExecutionProperty:
+        MaxConcurrentRuns: 1
+      Connections:
+        Connections:
+          - !Ref GlueConnectionSAP
+      GlueVersion: 3.0
+      MaxRetries: 0
+      Name: !Sub 'gluejob-awstips-sap-sample'
+      Role: !Ref GlueIAMRoleArn
+      WorkerType: Standard
+      NumberOfWorkers: 2

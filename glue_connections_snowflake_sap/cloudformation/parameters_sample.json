@@ -1,0 +1,6 @@
+[
+    { "ParameterKey" : "GlueConnAZ", "ParameterValue" : ""},
+    { "ParameterKey" : "GlueConnSecurityGroup", "ParameterValue" : ""},
+    { "ParameterKey" : "GlueConnSubnetId", "ParameterValue" : ""},
+    { "ParameterKey" : "GlueIAMRoleArn", "ParameterValue" : ""}
+]

@@ -1,0 +1,68 @@
+Parameters:
+  GlueConnAZ:
+    Description: Availability Zone Glue connection refers to
+    Type: String
+  GlueConnSecurityGroup:
+    Description: Security Group for Glue connection
+    Type: String
+  GlueConnSubnetId:
+    Description: Subnet for Glue connection
+    Type: String
+  GlueIAMRoleArn:
+    Description: IAM Role for Glue Job
+    Type: String
+
+Resources:
+  SecretGlueSnowflake:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: 'awstips/glue/snowflake'
+      SecretString: !Sub |
+        {
+          "sf_host"      : "__PUT_SF_URL_HERE__",
+          "sf_warehouse" : "__PUT_SF_WH_NAME_HERE__",
+          "sf_database"  : "__PUT_SF_DB_NAME_HERE__",
+          "sf_schema"    : "__PUT_SF_SCHEMA_NAME_HERE__",
+          "sf_role"      : "__PUT_SF_ROLE_HERE__",
+          "sf_username"  : "__PUT_USERNAME_HERE__",
+          "sf_password"  : "__PUT_PASSWORD_HERE__"
+        }
+
+  GlueConnectionSnowflake:
+    Type: AWS::Glue::Connection
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      ConnectionInput: 
+        Description: "sample-snowflake-connection"
+        ConnectionType: "CUSTOM"
+        PhysicalConnectionRequirements:
+          AvailabilityZone: !Ref GlueConnAZ
+          SecurityGroupIdList: 
+           - !Ref GlueConnSecurityGroup
+          SubnetId: !Ref GlueConnSubnetId
+        ConnectionProperties:
+          "CONNECTOR_CLASS_NAME": "net.snowflake.client.jdbc.SnowflakeDriver"
+          "CONNECTOR_TYPE": "Jdbc"
+          "CONNECTOR_URL": "s3://s3-awstips-glueconn-804071151415-glue/jdbc_drivers/snowflake-jdbc-3.13.16.jar"
+          "JDBC_CONNECTION_URL": jdbc:snowflake://${sf_host}:443/?user=${sf_username}&password=${sf_password}&warehouse=${sf_warehouse}&db=${sf_database}&schema=XENA&role=${sf_role}
+          "SECRET_ID": !Ref SecretGlueSnowflake
+        Name: 'glueconn-awstips-snowflake'
+
+  GlueJobSnowflakeSample:
+    Type: AWS::Glue::Job
+    Properties:
+      Command:
+        Name: "glueetl"
+        PythonVersion: 3
+        ScriptLocation: !Sub 's3://s3-awstips-glueconn-804071151415-glue/scripts/sample_snowflake_job.py'
+      ExecutionProperty:
+        MaxConcurrentRuns: 1
+      Connections:
+        Connections:
+          - !Ref GlueConnectionSnowflake
+      GlueVersion: 3.0
+      MaxRetries: 0
+      Name: gluejob-awstips-snowflake-sample
+      Role: !Ref GlueIAMRoleArn
+      WorkerType: Standard
+      NumberOfWorkers: 2
