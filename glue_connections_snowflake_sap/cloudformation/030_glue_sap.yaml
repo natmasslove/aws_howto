@@ -8,21 +8,34 @@ Parameters:
   GlueConnSubnetId:
     Description: Subnet for Glue connection
     Type: String
-  GlueIAMRoleArn:
-    Description: IAM Role for Glue Job
+  SAPHost:
+    Description: SAP Host
     Type: String
+    NoEcho: true
+  SAPPort:
+    Description: SAP Port
+    Type: String
+    NoEcho: true
+  SAPUsername:
+    Description: SAP Username
+    Type: String
+    NoEcho: true
+  SAPPassword:
+    Description: SAP Password
+    Type: String
+    NoEcho: true            
 
 Resources:
   SecretGlueSAP:
     Type: AWS::SecretsManager::Secret
     Properties:
       Name: 'awshowto/glue/sap'
-      SecretString: !Sub |
+      SecretString: |
         {
-          "sap_host"     : "__PUT_SAP_URL_HERE__",
-          "sap_port"     : "__PUT_PORT_HERE__",
-          "sap_username" : "__PUT_USERNAME_HERE__",
-          "sap_password" : "__PUT_PASSWORD_HERE__"
+          "sap_host"     : !Ref SAPHost,
+          "sap_port"     : !Ref SAPPort,
+          "sap_username" : !Ref SAPUsername,
+          "sap_password" : !Ref SAPPassword,
         }
 
   GlueConnectionSAP:
@@ -40,11 +53,27 @@ Resources:
         ConnectionProperties:
           "CONNECTOR_CLASS_NAME": "com.sap.db.jdbc.Driver"
           "CONNECTOR_TYPE": "Jdbc"
-          "CONNECTOR_URL": "s3://s3-awshowto-glueconn-804071151415-glue/jdbc_drivers/ngdbc-2.12.9.jar"
-!ImportValue awshowto-s3-bucket-glue          
+          "CONNECTOR_URL": !Sub 
+            - "s3://${s3_bucket_name}/jdbc_drivers/ngdbc-2.12.9.jar"
+            - s3_bucket_name: !ImportValue awshowto-s3-bucket-glue          
           "JDBC_CONNECTION_URL": jdbc:sap://${sap_host}:${sap_port}/?user=${sap_username}&password=${sap_password}
           "SECRET_ID": !Ref SecretGlueSAP
         Name: 'glueconn-awshowto-sap'
+
+  GlueIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "iamr-awshowto-glueconn-glue-role-sap"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - glue.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
 
   GlueJobSAPSample:
     Type: AWS::Glue::Job
@@ -52,8 +81,9 @@ Resources:
       Command:
         Name: "glueetl"
         PythonVersion: 3
-        ScriptLocation: !Sub 's3://s3-awshowto-glueconn-804071151415-glue/scripts/sample_sap_job.py'
-!ImportValue awshowto-s3-bucket-glue        
+        ScriptLocation: !Sub 
+          - 's3://${s3_bucket_name}/scripts/sample_sap_job.py'
+          - s3_bucket_name: !ImportValue awshowto-s3-bucket-glue        
       ExecutionProperty:
         MaxConcurrentRuns: 1
       Connections:
@@ -62,6 +92,6 @@ Resources:
       GlueVersion: 3.0
       MaxRetries: 0
       Name: !Sub 'gluejob-awshowto-sap-sample'
-      Role: !Ref GlueIAMRoleArn
+      Role: !Ref GlueIAMRole
       WorkerType: Standard
       NumberOfWorkers: 2

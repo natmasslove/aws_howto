@@ -79,7 +79,7 @@ Resources:
   GlueIAMRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: "iamr-awshowto-glueconn-glue-role"
+      RoleName: "iamr-awshowto-glueconn-glue-role-sf"
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:

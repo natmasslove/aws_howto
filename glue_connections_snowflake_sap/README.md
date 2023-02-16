@@ -6,6 +6,9 @@
     - [Creating secret, glue connection and sample job](#creating-secret-glue-connection-and-sample-job)
     - [Testing connectivity](#testing-connectivity)
   - [Connecting to SAP HANA](#connecting-to-sap-hana)
+    - [Download JDBC driver and upload to s3 bucket](#download-jdbc-driver-and-upload-to-s3-bucket-1)
+    - [Creating secret, glue connection and sample job](#creating-secret-glue-connection-and-sample-job-1)
+    - [Testing connectivity](#testing-connectivity-1)
   - [Clean Up](#clean-up)
     - [Delete Snowflake-related resources](#delete-snowflake-related-resources)
     - [Delete SAP-related resources](#delete-sap-related-resources)
@@ -68,7 +71,7 @@ Notes:
 * More up-to-date version of JDBC driver might be available when you're reading this. You can replace the url in the first line of code below. Also you will need to change the file name in cloudformation/020_glue_snowflake.yaml (GlueConnectionSnowflake resource)
 * Please replace {{s3_bucket_name}} with the bucket created in prerequisites section.
 
-```
+```bash
 wget -N -P jdbc_drivers/ https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.13.16/snowflake-jdbc-3.13.16.jar
 
 aws s3 cp jdbc_drivers/snowflake-jdbc-3.13.16.jar s3://{{s3_bucket_name}}/jdbc_drivers/
@@ -123,9 +126,71 @@ aws glue start-job-run --job-name gluejob-awshowto-snowflake-sample
 <a id="sap"></a>
 ## Connecting to SAP HANA
 
-TODO:
+### Download JDBC driver and upload to s3 bucket
+
+Run the following commands to upload SAP JDBC driver into your S3 bucket.
+
+Notes:
+* More up-to-date version of JDBC driver might be available when you're reading this. You can replace the url in the first line of code below. Also you will need to change the file name in cloudformation/030_glue_sap.yaml (GlueConnectionSAP resource)
+* Please replace {{s3_bucket_name}} with the bucket created in prerequisites section.
+
+```bash
+wget -N -P jdbc_drivers/ https://repo1.maven.org/maven2/com/sap/cloud/db/jdbc/ngdbc/2.12.9/ngdbc-2.12.9.jar
+
+aws s3 cp jdbc_drivers/ngdbc-2.12.9.jar s3://{{s3_bucket_name}}/jdbc_drivers/
+```
+
+### Creating secret, glue connection and sample job
+
+1. **Fill in values in cloudformation/sap_parameters.json:**
+
+![SAP parameters](images/sap_parameters.png)
+
+Parameters include:
+- SAP credentials to store in Secrets Manager
+- Availability Zone, Subnet and Security Group which are used to create Glue Connection
+
+2. **Create resource as CloudFormation Stack**
+
+Run the following command:
+```bash
+aws cloudformation create-stack --stack-name cf-awshowto-glueconn-030-glue-sap --capabilities CAPABILITY_NAMED_IAM \
+    --template-body file://cloudformation/030_glue_sap.yaml --parameters file://cloudformation/sap_parameters.json
+```
+
+This creates the following resources:
+* *Secret in AWS Secrets Manager*
+* *Glue Connection*
+
+  Glue Connection refers to the previously created Secret. This is a more secure way to store credentials rather then storing them inside Glue connection itself.  
+  For more information - refer to [this section](#use-secret-in-glue-connection).
+
+* *IAM Role for Sample Glue Job*
+
+  It provides minimal required permission for the sample glue job.
+
+* *Sample Glue Job to test connectivity*
+
+  Job source code can be found in glue/sample_sap_job.py.
+  It contains a snippet on howto connect to SAP from pySpark job and execute simple query.
+
+In order to upload Glue Job script onto S3, run the following command (don't forget to put actual S3 bucket name there):
+```bash
+aws s3 cp glue/sample_sap_job.py s3://{{s3_bucket_name}}/scripts/
+```
+
+### Testing connectivity
+
+Now we want to run our sample Glue Job to ensure it connects to SAP successfully:
+```bash
+aws glue start-job-run --job-name gluejob-awshowto-sap-sample
+```
 
 ## Clean Up
+
+Note: Both Snowflake and SAP clean-up sections contain explicit Secret deletion (not via CloudFormation) with "force-delete-without-recovery"
+It makes possible to delete and recreate sample stacks multiple times.  
+Otherwise, AWS performs "soft delete" of the secret and it will lead to an error if you try to create stack within next 30 days.
 
 ### Delete Snowflake-related resources
 
@@ -135,17 +200,24 @@ aws secretsmanager delete-secret --secret-id awshowto/glue/snowflake --force-del
 
 aws cloudformation delete-stack --stack-name cf-awshowto-glueconn-020-glue-snowflake
 ```
-Note: Secret is deleted explicitly (not via CloudFormation) with "force-delete-without-recovery", so you can easily
-delete and recreate sample stacks multiple times.  
-Otherwise, AWS performs "soft delete" of the secret and it will lead to an error if you try to create stack within next 30 days.
 
 ### Delete SAP-related resources
 
-TODO:
+Run the following commands:
+```
+aws secretsmanager delete-secret --secret-id awshowto/glue/sap --force-delete-without-recovery
+
+aws cloudformation delete-stack --stack-name cf-awshowto-glueconn-030-glue-sap
+```
 
 ### Delete S3 bucket
 
-TODO:
+Don't forget to put actual S3 bucket name:
+```
+aws s3 rm s3://{{s3_bucket_name}}/ --recursive
+
+aws cloudformation delete-stack --stack-name cf-awshowto-glueconn-010-s3
+```
 
 <a id="use-secret-in-glue-connection"></a>
 # How to store Glue Connection's credentials in Secrets Manager
