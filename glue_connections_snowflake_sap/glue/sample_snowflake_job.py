@@ -13,7 +13,7 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 
 query = "SELECT table_schema, table_name FROM information_schema.tables LIMIT 10"
-connection_name = "glueconn-awstips-snowflake"
+connection_name = "glueconn-awshowto-snowflake"
 connection_type = "custom.jdbc"
 connection_options = { "query": query, "connectionName": connection_name}
 

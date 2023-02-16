@@ -16,7 +16,7 @@ Resources:
   SecretGlueSAP:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: 'awstips/glue/sap'
+      Name: 'awshowto/glue/sap'
       SecretString: !Sub |
         {
           "sap_host"     : "__PUT_SAP_URL_HERE__",
@@ -40,10 +40,11 @@ Resources:
         ConnectionProperties:
           "CONNECTOR_CLASS_NAME": "com.sap.db.jdbc.Driver"
           "CONNECTOR_TYPE": "Jdbc"
-          "CONNECTOR_URL": "s3://s3-awstips-glueconn-804071151415-glue/jdbc_drivers/ngdbc-2.12.9.jar"
+          "CONNECTOR_URL": "s3://s3-awshowto-glueconn-804071151415-glue/jdbc_drivers/ngdbc-2.12.9.jar"
+!ImportValue awshowto-s3-bucket-glue          
           "JDBC_CONNECTION_URL": jdbc:sap://${sap_host}:${sap_port}/?user=${sap_username}&password=${sap_password}
           "SECRET_ID": !Ref SecretGlueSAP
-        Name: 'glueconn-awstips-sap'
+        Name: 'glueconn-awshowto-sap'
 
   GlueJobSAPSample:
     Type: AWS::Glue::Job
@@ -51,7 +52,8 @@ Resources:
       Command:
         Name: "glueetl"
         PythonVersion: 3
-        ScriptLocation: !Sub 's3://s3-awstips-glueconn-804071151415-glue/scripts/sample_sap_job.py'
+        ScriptLocation: !Sub 's3://s3-awshowto-glueconn-804071151415-glue/scripts/sample_sap_job.py'
+!ImportValue awshowto-s3-bucket-glue        
       ExecutionProperty:
         MaxConcurrentRuns: 1
       Connections:
@@ -59,7 +61,7 @@ Resources:
           - !Ref GlueConnectionSAP
       GlueVersion: 3.0
       MaxRetries: 0
-      Name: !Sub 'gluejob-awstips-sap-sample'
+      Name: !Sub 'gluejob-awshowto-sap-sample'
       Role: !Ref GlueIAMRoleArn
       WorkerType: Standard
       NumberOfWorkers: 2

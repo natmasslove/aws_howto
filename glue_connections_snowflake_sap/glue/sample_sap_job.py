@@ -13,7 +13,7 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 
 query = "SELECT 1 as id  UNION ALL SELECT 2 as id"
-connection_name = "glueconn-awstips-sap"
+connection_name = "glueconn-awshowto-sap"
 connection_type = "custom.jdbc"
 connection_options = { "query": query, "connectionName": connection_name}
 

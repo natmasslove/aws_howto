@@ -16,7 +16,7 @@ Resources:
   SecretGlueSnowflake:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: 'awstips/glue/snowflake'
+      Name: 'awshowto/glue/snowflake'
       SecretString: !Sub |
         {
           "sf_host"      : "__PUT_SF_URL_HERE__",
@@ -43,10 +43,10 @@ Resources:
         ConnectionProperties:
           "CONNECTOR_CLASS_NAME": "net.snowflake.client.jdbc.SnowflakeDriver"
           "CONNECTOR_TYPE": "Jdbc"
-          "CONNECTOR_URL": "s3://s3-awstips-glueconn-804071151415-glue/jdbc_drivers/snowflake-jdbc-3.13.16.jar"
+          "CONNECTOR_URL": "s3://s3-awshowto-glueconn-804071151415-glue/jdbc_drivers/snowflake-jdbc-3.13.16.jar"
           "JDBC_CONNECTION_URL": jdbc:snowflake://${sf_host}:443/?user=${sf_username}&password=${sf_password}&warehouse=${sf_warehouse}&db=${sf_database}&schema=XENA&role=${sf_role}
           "SECRET_ID": !Ref SecretGlueSnowflake
-        Name: 'glueconn-awstips-snowflake'
+        Name: 'glueconn-awshowto-snowflake'
 
   GlueJobSnowflakeSample:
     Type: AWS::Glue::Job
@@ -54,7 +54,8 @@ Resources:
       Command:
         Name: "glueetl"
         PythonVersion: 3
-        ScriptLocation: !Sub 's3://s3-awstips-glueconn-804071151415-glue/scripts/sample_snowflake_job.py'
+        ScriptLocation: !Sub 's3://s3-awshowto-glueconn-804071151415-glue/scripts/sample_snowflake_job.py'
+            !ImportValue awshowto-s3-bucket-glue
       ExecutionProperty:
         MaxConcurrentRuns: 1
       Connections:
@@ -62,7 +63,7 @@ Resources:
           - !Ref GlueConnectionSnowflake
       GlueVersion: 3.0
       MaxRetries: 0
-      Name: gluejob-awstips-snowflake-sample
+      Name: gluejob-awshowto-snowflake-sample
       Role: !Ref GlueIAMRoleArn
       WorkerType: Standard
       NumberOfWorkers: 2
