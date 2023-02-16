@@ -1,0 +1,48 @@
+
+* [Introduction](#introduction)
+* [General Steps to connect glue jobs](#general-steps)
+
+
+<a id="introduction"></a>
+# Introduction
+
+This article provides a step-by-step guide for setting up your glue jobs and connection to be able to connect to Snowflake and SAP HANA databases.
+This guide also helps you to establish process for other JDBC sources.
+This article provides sample CloudFormation code for creating resources alongside with sample jobs for testing.
+This article also shows best practices on setting up Glue Connections, so credentials are stored in Secrets Manager rather than in Connection itself.
+
+<a id="general-steps"></a>
+# General Steps to setup up Glue to work with JDBC sources such as Snowflake, SAP HANA
+
+Here we describe general overview of steps. Code specific
+
+Prerequisite - you'll need S3 bucket to store glue jobs scripts and artifacts (such as jdbc drivers).
+
+- Step1. Create a secret in Secrets Manager storing your credentials
+- Step2. Download JDBC driver and put it into Glue S3 bucket
+- Step2. Create a Glue Connection 
+    - provide a proper JDBC string 
+    - reference JDBC driver location on S3
+    - reference previously created secret
+
+Testing:
+- Step4. Create a Glue job (sample code is in "glue" folder)
+- Step5. Run the glue Jobs to test connectivity
+
+<a id="prerequisites"></a>
+## Prerequisites
+
+In this step we create a bucket where we place the sample glue job scripts and JDBC drivers.
+```bash
+aws cloudformation create-stack --stack-name cf-awshowto-glueconn-010-s3 \
+    --template-body file://cloudformation/010_s3.yaml
+```
+
+<a id="download-glue-drivers"></a>
+## Snowflake Connection
+
+
+# How to store Glue Connection's credentials in Secrets Manager
+
+
+# Implementation for 

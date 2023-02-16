@@ -1,0 +1,94 @@
+
+todo: remove role-arn from commands
+todo: in 020_glue...yaml - pick up s3 bucket name automatically
+
+This article:
+- provides a guide how to configure your Glue Jobs and Glue connections to use Snowflaks Database and SAP as data source.
+- shows example how to put credentials into Secrets Manager and, then, use it in a Glue Connection
+
+
+## Pre-requisites
+
+1. create s3 bucket to store Glue Job scripts and JDBC Drivers for Snowflake and SAP HANA
+```
+aws cloudformation create-stack --stack-name cf-awshowto-010-s3 --template-body file://cloudformation/010_s3.yaml --role-arn arn:aws:iam::804071151415:role/iamr-ems-gdp-xena-cloudformation-003
+```
+
+## Snowflake
+
+SF1. Download snowflake driver and upload to s3 bucket
+```
+wget -N -P jdbc_drivers/ https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.13.16/snowflake-jdbc-3.13.16.jar
+
+todo: replace with <<accountId>>
+aws s3 cp jdbc_drivers/snowflake-jdbc-3.13.16.jar s3://s3-awshowto-glueconn-804071151415-glue/jdbc_drivers/
+```
+Note: you can choose more up-to-date version of a driver (change driver filename in commands above and in cloudformation/020_glue_snowflake.yaml)
+
+SF2. upload sample glue job script into s3  /glue/
+
+```bash
+aws s3 cp glue/sample_snowflake_job.py s3://s3-awshowto-glueconn-804071151415-glue/scripts/
+```
+
+SF3. fill in parameters (AZ, security group, subnet) in #todo
+
+SF4. create glue connection and glue job
+```
+aws cloudformation create-stack --stack-name cf-awshowto-020-glue-snowflake --template-body file://cloudformation/020_glue_snowflake.yaml --parameters file://cloudformation/parameters.json --role-arn arn:aws:iam::804071151415:role/iamr-ems-gdp-xena-cloudformation-003
+```
+
+SF5. Test run glue job. Job name is gluejob-awshowto-snowflake-sample
+
+## SAP HANA:
+
+SAP1. Download SAP jdbc driver and upload to s3 bucket
+```
+wget -N -P jdbc_drivers/ https://repo1.maven.org/maven2/com/sap/cloud/db/jdbc/ngdbc/2.12.9/ngdbc-2.12.9.jar
+
+todo: replace with <<accountId>>
+aws s3 cp jdbc_drivers/ngdbc-2.12.9.jar s3://s3-awshowto-glueconn-804071151415-glue/jdbc_drivers/
+```
+Note: you can choose more up-to-date version of a driver (change driver filename in commands above and in cloudformation/020_glue_snowflake.yaml)
+
+SAP2. upload sample glue job script into s3  /glue/
+
+```
+aws s3 cp glue/sample_sap_job.py s3://s3-awshowto-glueconn-804071151415-glue/scripts/
+```
+
+SAP3. fill in parameters (AZ, security group, subnet) in #todo
+
+SAP4. create glue connection and glue job
+```
+aws cloudformation create-stack --stack-name cf-awshowto-030-glue-sap --template-body file://cloudformation/030_glue_sap.yaml --parameters file://cloudformation/parameters.json --role-arn arn:aws:iam::804071151415:role/iamr-ems-gdp-xena-cloudformation-003
+```
+
+## Clean Up
+
+#todo
+
+### Delete Snowflake-related: Secret / Glue Job / Glue Connection
+```
+aws secretsmanager delete-secret --secret-id awshowto/glue/snowflake --force-delete-without-recovery
+
+aws cloudformation delete-stack --stack-name cf-awshowto-020-glue-snowflake --role-arn arn:aws:iam::804071151415:role/iamr-ems-gdp-xena-cloudformation-003
+```
+Note: #todo- why delete secret
+
+### Delete SAP-related: Secret / Glue Job / Glue Connection
+```
+aws secretsmanager delete-secret --secret-id awshowto/glue/sap --force-delete-without-recovery
+
+aws cloudformation delete-stack --stack-name cf-awshowto-030-glue-sap --role-arn arn:aws:iam::804071151415:role/iamr-ems-gdp-xena-cloudformation-003
+```
+Note: #todo- why delete secret
+
+
+### Empty and delete Glue S3 bucket
+todo: replace your AccountID
+```
+aws s3 rm s3://s3-awshowto-glueconn-804071151415-glue/ --recursive
+
+aws cloudformation delete-stack --stack-name cf-awshowto-010-s3 --role-arn arn:aws:iam::804071151415:role/iamr-ems-gdp-xena-cloudformation-003
+```

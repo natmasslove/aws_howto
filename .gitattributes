@@ -1,0 +1,5 @@
+* text=auto
+
+# Declare Shell Scripts that will always have LF line endings on checkout.
+*.sh text eol=lf
+*.cmd text eol=crlf
