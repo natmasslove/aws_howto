@@ -187,7 +187,7 @@ To confirm that our sample Glue Job can successfully connect to SAP, we'll run i
 aws glue start-job-run --job-name gluejob-awshowto-sap-sample
 ```
 
-This will trigger the job, which can be monitored in the AWS Glue console. Once the job completes, you can check its logs to verify that it was able to connect to Snowflake and execute the query successfully.
+This will trigger the job, which can be monitored in the AWS Glue console. Once the job completes, you can check its logs to verify that it was able to connect to SAP and execute the query successfully.
 
 ## Clean Up
 
