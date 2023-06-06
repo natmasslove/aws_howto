@@ -8,12 +8,6 @@ Parameters:
     Description: S3 bucket name for Airflow
     Type: String
 
-  MWAAActive:
-    Description: Used to drop/create MWAA resources on schedule. "true" - MWAA is active, "false" - inactive
-    Type: String
-    Default: true
-    AllowedValues: [true, false]
-
   MWAASecurityGroupIds:
     Description: CSV List of Security Groups
     Type: CommaDelimitedList
@@ -21,10 +15,6 @@ Parameters:
   MWAASubnetIds:
     Description: CSV List of  Subnets
     Type: CommaDelimitedList
-#####################################
-
-Conditions:
-  IsMWAAActive: !Equals ["true", !Ref MWAAActive] 
 
 #####################################
 Resources:
@@ -123,7 +113,6 @@ Resources:
 
   AirflowEnv:
     Type: AWS::MWAA::Environment
-    Condition: IsMWAAActive
     Properties:
       AirflowVersion: 2.5.1
       DagS3Path: dags
@@ -161,45 +150,3 @@ Resources:
           LogLevel: INFO
       WebserverAccessMode: PUBLIC_ONLY
       WeeklyMaintenanceWindowStart: SUN:21:00
-
-
-  # AirflowEnvSSM:
-  #   Type: AWS::MWAA::Environment
-  #   Condition: IsMWAAActive
-  #   Properties:
-  #     AirflowVersion: 2.2.2
-  #     DagS3Path: dags
-  #     EnvironmentClass: mw1.small
-  #     MaxWorkers: 2
-  #     MinWorkers: 1
-  #     Name: !Sub '${ProjectName}-ssm'
-  #     NetworkConfiguration:
-  #       SecurityGroupIds: !Ref MWAASecurityGroupIds
-  #       SubnetIds: !Ref MWAASubnetIds        
-  #     Schedulers: 2
-  #     SourceBucketArn: !Sub 'arn:aws:s3:::s3-${ProjectName}-${AWS::AccountId}'
-  #     ExecutionRoleArn: !GetAtt AirflowIAMRole.Arn
-  #     RequirementsS3Path: requirements.txt
-  #     AirflowConfigurationOptions:
-  #       secrets.backend: airflow.providers.amazon.aws.secrets.secrets_manager.SystemsManagerParameterStoreBackend
-  #       secrets.backend_kwargs: !Sub '{"connections_prefix" : "${ProjectName}/connections", "variables_prefix" : "${ProjectName}/variables"}'
-  #       os_var.variable1: value1SSM
-  #       env.variable2: 2023SSM
-  #     LoggingConfiguration:
-  #       DagProcessingLogs:
-  #         Enabled: true
-  #         LogLevel: INFO
-  #       SchedulerLogs:
-  #         Enabled: true
-  #         LogLevel: INFO
-  #       TaskLogs:
-  #         Enabled: true
-  #         LogLevel: INFO
-  #       WebserverLogs:
-  #         Enabled: true
-  #         LogLevel: INFO
-  #       WorkerLogs:
-  #         Enabled: true
-  #         LogLevel: INFO
-  #     WebserverAccessMode: PUBLIC_ONLY
-  #     WeeklyMaintenanceWindowStart: SUN:21:00
