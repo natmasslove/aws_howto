@@ -161,11 +161,10 @@ More on secrets format you can read in [Airflow Documentation](https://airflow.a
 
 #### **Secrets Naming**
 
-
 That's how secret names are defined:  
 ![Secret Names](images/secret_name.png)
 
-Secret names start with a prefix which was define in Airflow Environment creation template:  
+Secret names start with a prefix which was defined in Airflow Environment creation template:  
 ![Secrets Prefix](images/secret_prefix_mwaa.png)
 
 As a result in DAGs these connections can be refered by name, respectively, as:
@@ -173,6 +172,13 @@ As a result in DAGs these connections can be refered by name, respectively, as:
 - **aurora_mysql_json**
 
 ## Using connections - sample DAGs
+
+Now let's log into our MWAA environment and test using defined connection in our DAGs.
+The sample DAG we have for test is "demo_connection_mysql" (and if you database of preference in PostreSQL, you can use "demo_connection_postgresql" instead. Differences are minimal).
+
+![dag list](images/demo_mysql_dag.png)
+
+
 
 <<todo:>>
 1. demo_mysql_connection_dag.py - Show MySQLOperator and PythonOperator
