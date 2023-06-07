@@ -2,7 +2,7 @@
 # How to setup and use connections and variables in AWS managed Apache Airflow
 
 Amazon Managed Workflows for Apache Airflow (MWAA) provides a very nice and easy way to manage Airflow Cluster.
-It's not only about spinning up or maintaining the cluster, but it also seamlessly integrates with various AWS services.
+Beyond the straightforward setup and maintenance of clusters, MWAA provides seamless integration with various AWS services.
 
 One particularly useful integration is with AWS Secrets Manager, which allows you to store Airflow Connections and Variables securely. To name a few advantages of this approach:
 - Centralized storage of connection details in a secure location
@@ -113,8 +113,10 @@ apache-airflow[postgres]
 ```
 
 ### 4. Create sample secrets
-Let's create sample secrets which we can use:
-*Note: if you have a MySQL database to experiment with - please change sample parameter values with actual ones*
+Let's create some sample secrets that we can use:
+
+*Note: if you have a MySQL database to experiment with, please change the sample parameter values to your actual ones*
+
 ```bash
   export project_name="mwaa-secrets-demo"
   export stack_name="cfrm-${project_name}-025-secrets-mysql-and-var"
@@ -126,15 +128,15 @@ Let's create sample secrets which we can use:
     --parameter-overrides ProjectName=$project_name DBHost=sample_host DBLogin=sample_user DBPassword=sample_password DBDatabase=sample_dbname
 ```
 
-Cloudformation stack creates 3 resources:
-1. Secret containing connection to MySQL database in URI format
-2. Secret in JSON format
-3. Secret containing value for variable - it will be used in "Variables" section.
+Cloudformation stack creates three resources:
+1. A secret containing the connection detail for the MySQL database in URI format
+2. A secret in JSON format
+3. A secret containing value for a variable - it will be used in "Variables" section.
 
 #### **Secret String Format**
 
-Two secrets created (URI and JSON format) are equivalent and can be used interchangeably.
-Here we create both only for demonstrational purposes.
+Two secrets are created in URI and JSON formats. These formats can be used interchangeably and define equivalent connections.
+We create both formats for demonstration purposes.
 
 URI Format:
 ```
@@ -153,20 +155,20 @@ JSON Format:
   }
 ```
 
-When choosing which format to use consider the following:
+When choosing which format to use, consider the following:
 - JSON format for storing credentials available starting from Airflow version 2.3.0
 - JSON format tends to be more readable in our opinion. Also, it might be more friendly for other secret value consumers (other scripts or services which might need to retrieve DB credentials)
 
-More on secrets format you can read in [Airflow Documentation](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html).
+You can find more information about secrets formats in the [Airflow Documentation](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html).
 
-*Note: If you prefer using PostgreSQL database - there's an alternative template for it: cloudformation/030_secrets_postgresql.yaml. The differences are **conn_type** value and default DB port*
+*Note: If you prefer using PostgreSQL database - there's an alternative template available: cloudformation/030_secrets_postgresql.yaml. The differences are **conn_type** value and default DB port*
 
 #### **Secrets Naming**
 
 That's how secret names are defined:  
 ![Secret Names](images/secret_name.png)
 
-Secret names start with a prefix which was defined in Airflow Environment creation template:  
+Secret names start with a prefix that was defined in Airflow Environment creation template:  
 ![Secrets Prefix](images/secret_prefix_mwaa.png)
 
 As a result in DAGs these connections can be refered by name, respectively, as:
@@ -176,17 +178,17 @@ As a result in DAGs these connections can be refered by name, respectively, as:
 ## Using connections - sample DAGs
 
 Now let's log into our MWAA environment and test connections in our DAGs.  
-The sample DAG we have for the test is "demo_connection_mysql" (and if you database of preference in PostreSQL, you can use "demo_connection_postgresql" instead. Differences are minimal).
+The sample DAG we have for the test is "demo_connection_mysql". If you prefer to use PostgreSQL as your database, you can use the "demo_connection_postgresql" DAG instead. The differences between the two are minimal.
 
-*Note: Full source code of DAGs can be found in git: airflow\dags*
+*Note: The full source code of DAGs can be found in the Git repository under `airflow\dags`.*
 
 ![dag list](images/demo_mysql_dag.png)
 
-DAG contains three operators:
+The DAG contains three operators:
 
 ![dag operators](images/demo_dag_operators.png)
 
-1. **mysql_uri_connection** - which demonstrates using MySQLOperator to run "Create Table command" using connection defined in URI format
+1. **mysql_uri_connection** - which demonstrates using **MySQLOperator** to run "Create Table" command using connection defined in the URI format
 
 ```python
     mysql_uri_operator = MySqlOperator(
@@ -196,7 +198,7 @@ DAG contains three operators:
     )
 ```
 
-2. **execute_sql_json_connection** - uses MySQLHook inside PythonOperator to execute simple select using connection defined in JSON format (as you might remember, both URI and JSON format and interchangeable)
+2. **execute_sql_json_connection** - uses **MySQLHook** inside a PythonOperator to execute simple select using connection defined in JSON format. As you may recall, both the URI and JSON formats are interchangeable.
 
 ```python
     conn_id = "aurora_mysql_json" # refers to secret named <connection_prefix>/aurora_mysql_json
@@ -207,33 +209,31 @@ DAG contains three operators:
     ...
 ```
 
-3. **get_connection** - retrieves and outputs both URI and JSON connections to prove they result in the same connection properties
+3. **get_connection** - this operator retrieves and outputs both the URI and JSON connections to demonstrate that they result in the same connection properties.
 ![get_connection_output](images/get_connection_output.png)
 
 ## Using Variable values (Secrets / OS local variable)
 
-Now let's take a look at several ways to define variables in Airflow.
+Now let's explore several methods for defining variables in Airflow.
 
 ![High-level description](images/high-level-variables.png)
 
-The first one is to define those using AWS Secrets Manager (very similar to working with connection we described above).  
+The first method is to define variables using AWS Secrets Manager, which is very similar to working with connections, as we described above.
 
-Another method is to define OS environment variables, which is more suitable for rarely changing values (one of real-life examples -
-is to define environment-name (dev/qa/prod)).
+Another method is to define OS environment variables, which is more suitable for values that rarely change. One real-life example is defining the environment name (e.g., dev/qa/prod).
 
-If you have followed cluster set up steps from previous section, all variables are already ready to use.
-Let's proceed and test those.
+If you have followed the cluster setup steps from the previous section, all the variables are already prepared for use. Let's proceed and test them.
 
 ### Retrieving variable value from Secrets Manager
 
-MWAA cluster settings done in cloudformation\020_mwaa.yaml (variables_prefix):
+In the MWAA cluster settings defined in **cloudformation/020_mwaa.yaml**, we specified the **variables_prefix** for the Secrets Manager backend:
 ```yaml
       AirflowConfigurationOptions:
         secrets.backend: airflow.providers.amazon.aws.secrets.secrets_manager.SecretsManagerBackend
         secrets.backend_kwargs: !Sub '{"connections_prefix" : "${ProjectName}/connections", "variables_prefix" : "${ProjectName}/variables"}'
 ```
 
-Test variable is created in cloudformation\025_secrets_mysql_and_var.yaml:
+We have also created a test variable in **cloudformation/025_secrets_mysql_and_var.yaml**:
 ```yaml
   SecretMWAATestVariable:
     Type: AWS::SecretsManager::Secret
@@ -242,28 +242,28 @@ Test variable is created in cloudformation\025_secrets_mysql_and_var.yaml:
       SecretString: This is a Value of test variable (stored in secrets manager)
 ```
 
-Now let's retrieve the value using demo_variable_secrets DAG:
+Now let's retrieve the value using the **demo_variable_secrets** DAG:
 
 ![demo_variable_secrets_dag](images/demo_variable_secrets_dag.png)
 
 ```python
   def print_vars_from_secret():
-      var_names = ['test_variable'] # searches for secret named "${ProjectName}/variables/test_variable"
+      var_names = ['test_variable'] # searches for a secret named "${ProjectName}/variables/test_variable"
       for item in var_names:
           value = Variable.get(item)
           print(f"---> {item} : {value}")
 ```
 
-The task output looks like this:
+The output of the task will look like this:
 ```
 [2023-06-07, 20:38:34 UTC] {{logging_mixin.py:137}} INFO - ---> test_variable : This is a Value of test variable (stored in secrets manager)
 ```
 
-As easy as that!
+It's as simple as that!
 
 ### Retrieving environment variable value
 
-We have defined two environment variables whilst creating the cluster (cloudformation/020_mwaa.yaml):
+During the creation of the cluster in **cloudformation/020_mwaa.yaml**, we defined two environment variables:
 ```yaml
       AirflowConfigurationOptions:
         ...
@@ -271,7 +271,7 @@ We have defined two environment variables whilst creating the cluster (cloudform
         env.variable2: 2023
 ```
 
-Now let's access those running demo_variable_env DAG:
+Now let's access these variables running **demo_variable_env** DAG:
 ```python
   def print_defined_vars():
       var_names = ['AIRFLOW__OS_VAR__VARIABLE1','AIRFLOW__ENV__VARIABLE2']
@@ -284,11 +284,11 @@ Now let's access those running demo_variable_env DAG:
 - CloudFormation template:
   - os_var.variable1
   - env.variable2
-- Accessing from DAG ("AIRFLOW_" prefix & all uppercase & "." is replaced by "__")
+- Accessing from DAG ("AIRFLOW_" prefix, all uppercase, "." is replaced by "__")
   - AIRFLOW__OS_VAR__VARIABLE1
   - AIRFLOW__ENV__VARIABLE2
 
-The output:
+The output of the task will be:
 ```
 [2023-06-07, 20:51:06 UTC] {{logging_mixin.py:137}} INFO - ---> AIRFLOW__OS_VAR__VARIABLE1 : value1
 [2023-06-07, 20:51:06 UTC] {{logging_mixin.py:137}} INFO - ---> AIRFLOW__ENV__VARIABLE2 : 2023
@@ -296,21 +296,20 @@ The output:
 
 ### Methods comparison
 
-Variables stored in AWS Secrets Manager provide more flexibility as you can change its the value just by modifying the secret.
+Variables stored in AWS Secrets Manager provide more flexibility, as you can change their values by simply modifying the corresponding secret. On the other hand, changing environment variables requires updating the cluster settings, which is a time-consuming operation that takes around 20-30 minutes.
 
-While for environment variable change you need to update cluster settings, which is time-consuming operation (taking 20-30 minutes).
-
-The downside of secret-based variables is the fact you are charged for each secret stored.
+However, it's important to note that using secret-based variables incurs charges for each secret stored, while environment variables do not have any additional cost.
 
 
 ## Considerations when using Connections and Variables in Secrets Manager
 
-Please don't forget your are charged for storing and accessing each secret.
-Current price is $0.40 per secret per month and $0.05 per 10 000 API calls (pricing might be subject to change, so check the actual charges in [AWS Documentation](https://aws.amazon.com/secrets-manager/pricing/?nc1=h_ls) )
+It's important to consider the cost implications when utilizing Connections and Variables in Secrets Manager. Remember that you will incur charges for both storing and accessing each individual secret.
+
+As of now, the pricing for Secrets Manager is $0.40 per secret per month, and there is an additional cost of $0.05 per 10,000 API calls. Please note that pricing is subject to change, so it's advisable to refer to the [AWS Documentation](https://aws.amazon.com/secrets-manager/pricing/?nc1=h_ls) for the most up-to-date pricing information.
 
 ## Clean Up
 
-Here are the step to clean up demonstrational resources we've created in this guide:
+By following these steps, you will clean up all the resources created for the demonstration.
 
 ### 1. Delete secrets
 
@@ -333,9 +332,11 @@ export stack_name="cfrm-${project_name}-030-secrets-postgresql"
   aws cloudformation wait stack-delete-complete --stack-name ${stack_name}  
 ```    
 
-*Note: we included explicit Secret deletion (not via CloudFormation) with "force-delete-without-recovery".
-It makes possible to delete and recreate sample stacks multiple times.  
-Otherwise, AWS performs "soft delete" of the secret and it will lead to an error if you try to create stack within next 30 days.*
+*Note: Please note that we have explicitly deleted the secrets using the "force-delete-without-recovery" option, rather than relying on CloudFormation. This approach allows us to delete and recreate the sample stacks multiple times.*
+
+*If we don't use this option, AWS performs a "soft delete" of the secret, which means it is not immediately deleted and can still be recovered. However, if you attempt to create a stack with the same name within the next 30 days, it will result in an error due to the secret being in a deleted state.*
+
+*By using the "force-delete-without-recovery" option, we ensure that the secrets are immediately and permanently deleted, allowing us to create new stacks without any issues.*
 
 
 ### 2. Delete Airflow Cluster
@@ -363,7 +364,7 @@ export stack_name="cfrm-${project_name}-015-s3"
   aws cloudformation wait stack-delete-complete --stack-name ${stack_name}
 ``` 
 
-*Note: we include a shell script to empty S3 versioned bucket, which is prerequisite for deleting the bucket via CloudFormation stack.*
+*Note: we include a shell script that empties S3 versioned bucket. This step is necessary as a prerequisite for deleting the bucket using the CloudFormation stack.*
 
 ### 4. Delete VPC Stack
 
