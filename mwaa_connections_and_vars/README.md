@@ -111,16 +111,66 @@ apache-airflow[postgres]
 ```
 
 ### 4. Create sample secrets
+Let's create sample secrets which we can use:
+*Note: if you have a MySQL database to experiment with - please change sample parameter values with actual ones*
+```bash
+  export project_name="mwaa-secrets-demo"
+  export stack_name="cfrm-${project_name}-025-secrets-mysql-and-var"
 
-<<todo:>>
-!! Replace 030_secrets.yaml values with DUMMY data
+  aws cloudformation deploy \
+    --template-file cloudformation/025_secrets_mysql_and_var.yaml \
+    --stack-name $stack_name \
+    --no-fail-on-empty-changeset \
+    --parameter-overrides ProjectName=$project_name DBHost=sample_host DBLogin=sample_user DBPassword=sample_password DBDatabase=sample_dbname
+```
 
-<<todo:>>
-1. Add screenshot of secrets
-2. Explain difference between URI and JSON format
-3. Mention JSON available since 2.3.1
-4. Formats can be used interchangebly
+Cloudformation stack creates 3 resources:
+1. Secret containing connection to MySQL database in URI format
+2. Secret in JSON format
+3. Secret containing value for variable - it will be used in "Variables" section.
 
+#### **Secret String Format**
+
+Two secrets created (URI and JSON format) are equivalent and can be used interchangeably.
+Here we create both only for demonstrational purposes.
+
+URI Format:
+```
+mysql://login:password@DBHost:3306/database
+```
+
+JSON Format:
+```json
+  {
+      "conn_type": "mysql",
+      "login"    : "login",
+      "password" : "password",
+      "host"     : "DBHost",
+      "database" : "database",
+      "port"     : 3306
+  }
+```
+
+When choosing which format to use consider the following:
+- JSON format for storing credentials available starting from Airflow version 2.3.0
+- JSON format tends to be more readable in our opinion. Also, it might be more friendly for other secret value consumers (other scripts or services which might need to retrieve DB credentials)
+
+More on secrets format you can read in [Airflow Documentation](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html).
+
+*Note: If you prefer using PostgreSQL database - there's an alternative template for it: cloudformation/030_secrets_postgresql.yaml. The differences are **conn_type** value and default DB port*
+
+#### **Secrets Naming**
+
+
+That's how secret names are defined:  
+![Secret Names](images/secret_name.png)
+
+Secret names start with a prefix which was define in Airflow Environment creation template:  
+![Secrets Prefix](images/secret_prefix_mwaa.png)
+
+As a result in DAGs these connections can be refered by name, respectively, as:
+- **aurora_mysql_uri**
+- **aurora_mysql_json**
 
 ## Using connections - sample DAGs
 
