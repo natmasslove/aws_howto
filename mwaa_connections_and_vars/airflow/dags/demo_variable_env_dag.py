@@ -33,7 +33,7 @@ def print_defined_vars():
     # Accessing from DAG ("AIRFLOW_" prefix & all uppercase & "." is replaced by "__")
     # - AIRFLOW__OS_VAR__VARIABLE1
     # - AIRFLOW__ENV__VARIABLE2
-    
+
     for item in var_names:
         value = os.environ[item]
         print(f"---> {item} : {value}")

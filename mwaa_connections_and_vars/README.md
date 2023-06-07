@@ -17,8 +17,9 @@ Full source code is stored in Git Repository: https://github.com/natmasslove/aws
 
 ## Secrets manager-based Connections: How it works
 
-<<todo:>>
-Add diagrams
+A diagram below represents on a high-level how connections are referenced in Airflow DAGs and how connection details are retrieved from AWS Secrets manager.  
+This requires setting airflow cluster and deploying other AWS resources properly.  
+In this article we demonstrate the process providing examples and the source code.
 
 ![High-level description](images/high-level-conn.png)
 
@@ -213,6 +214,8 @@ DAG contains three operators:
 ## Using Variable values (Secrets / OS local variable)
 
 <<todo:>> All resources created in previous steps
+
+![High-level description](images/high-level-variables.png)
 
 ### Retrieving variable value from Secrets Manager
 

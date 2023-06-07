@@ -37,4 +37,3 @@ with dag as dag:
         task_id='print_vars_from_secret',
         python_callable=print_vars_from_secret
     )    
-    
