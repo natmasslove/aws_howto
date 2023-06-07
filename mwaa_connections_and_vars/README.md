@@ -13,12 +13,14 @@ This gives us the following benefits:
 In this guide we provide step-by-step instructions on how to set up and use secrets manager-based connections and variables.
 It also includes cloudformation templates and sample DAG code, so you can easily integrate this solution into your project.
 
-Full source code is stored in Git Repository: https://github.com/natmasslove/aws_howto/tree/main/mwaa_connections_and_vars
+Full source code is stored in Git Repository: https://github.com/natmasslove/aws_howto/tree/mwaa_connections_and_vars/mwaa_connections_and_vars
 
 ## Secrets manager-based Connections: How it works
 
 <<todo:>>
 Add diagrams
+
+![High-level description](images/high-level-conn.png)
 
 
 ## Settings in your Airflow cluster to work with Secrets Manager and connect to DB
@@ -173,16 +175,40 @@ As a result in DAGs these connections can be refered by name, respectively, as:
 
 ## Using connections - sample DAGs
 
-Now let's log into our MWAA environment and test using defined connection in our DAGs.
-The sample DAG we have for test is "demo_connection_mysql" (and if you database of preference in PostreSQL, you can use "demo_connection_postgresql" instead. Differences are minimal).
+Now let's log into our MWAA environment and test connections in our DAGs.  
+The sample DAG we have for the test is "demo_connection_mysql" (and if you database of preference in PostreSQL, you can use "demo_connection_postgresql" instead. Differences are minimal).
+
+*Note: Full source code of DAGs can be found in git: airflow\dags*
 
 ![dag list](images/demo_mysql_dag.png)
 
+DAG contains three operators:
 
+![dag operators](images/demo_dag_operators.png)
 
-<<todo:>>
-1. demo_mysql_connection_dag.py - Show MySQLOperator and PythonOperator
-2. refer to demo_postgresql_connection_dag.py - the same implemented for PostgreSQL
+1. **mysql_uri_connection** - which demonstrates using MySQLOperator to run "Create Table command" using connection defined in URI format
+
+```python
+    mysql_uri_operator = MySqlOperator(
+        task_id='mysql_uri_connection',
+        mysql_conn_id = 'aurora_mysql_uri', # refers to secret named <connection_prefix>/aurora_mysql_uri
+        sql=CREATE_SQL
+    )
+```
+
+2. **execute_sql_json_connection** - uses MySQLHook inside PythonOperator to execute simple select using connection defined in JSON format (as you might remember, both URI and JSON format and interchangeable)
+
+```python
+    conn_id = "aurora_mysql_json" # refers to secret named <connection_prefix>/aurora_mysql_json
+    sql = SELECT_SQL
+
+    result = []
+    mysql_hook = MySqlHook(mysql_conn_id=conn_id)
+    ...
+```
+
+3. **get_connection** - retrieves and outputs both URI and JSON connections to prove they result in the same connection properties
+![get_connection_output](images/get_connection_output.png)
 
 ## Using Variable values (Secrets / OS local variable)
 
