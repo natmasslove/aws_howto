@@ -2,39 +2,37 @@
 # How to setup and use connections and variables in AWS managed Apache Airflow
 
 Amazon Managed Workflows for Apache Airflow (MWAA) provides a very nice and easy way to manage Airflow Cluster.
-It's not only about spinning up or maintaining the cluster, but the integration with other AWS Services as well.
+It's not only about spinning up or maintaining the cluster, but it also seamlessly integrates with various AWS services.
 
-Specifically, it's AWS Secrets Manager which can be used to store Airflow Connections and Variables.
-This gives us the following benefits:
-- Connection details are stored in centralized secure place
-- Connections can be used by multiple Airflow clusters or even other services while still maintained in one place
-- A separate security or operation team can maintain or update connection details (host change, password rotation etc.) without need to log into Airflow cluster
+One particularly useful integration is with AWS Secrets Manager, which allows you to store Airflow Connections and Variables securely. To name a few advantages of this approach:
+- Centralized storage of connection details in a secure location
+- The ability to share connections across multiple Airflow clusters and other services while keeping them maintained in one place
+- Separate security or operations teams can easily maintain and update connection details, such as host changes or password rotations, without needing access to the Airflow cluster.
 
-In this guide we provide step-by-step instructions on how to set up and use secrets manager-based connections and variables.
-It also includes cloudformation templates and sample DAG code, so you can easily integrate this solution into your project.
+In this guide, we'll walk you through the step-by-step process of setting up and utilizing Secrets Manager-based connections and variables. Additionally, we've included CloudFormation templates and sample DAGs code, so you can easily integrate this solution into your project.
 
-Full source code is stored in Git Repository: https://github.com/natmasslove/aws_howto/tree/mwaa_connections_and_vars/mwaa_connections_and_vars
+You can find the full source code in the following Git Repository: https://github.com/natmasslove/aws_howto/tree/mwaa_connections_and_vars/mwaa_connections_and_vars
 
 ## Secrets manager-based Connections: How it works
 
 A diagram below represents on a high-level how connections are referenced in Airflow DAGs and how connection details are retrieved from AWS Secrets manager.  
-This requires setting airflow cluster and deploying other AWS resources properly.  
-In this article we demonstrate the process providing examples and the source code.
 
 ![High-level description](images/high-level-conn.png)
+
+Properly setting up your Airflow cluster and deploying the necessary AWS resources is essential for this process. In this guide, we'll demonstrate the steps involved by providing examples and the corresponding source code.
 
 
 ## Settings in your Airflow cluster to work with Secrets Manager and connect to DB
 
-In this section we will walk you through the process of creating (or modifying) Airflow cluster.  
-Apart from usual, there are additional requirements for our use-case are:
-1. *IAM Role* associated with you Airflow cluster should have permissions to access secrets
-2. Python Libraries to interact with database should be installed (via *requirements.txt* file)
+In this section, we'll guide you through the process of creating a new Airflow cluster or modifying an existing one. In addition to the usual requirements, there are a few extra steps specific to our use case:
+- Ensure that the **IAM Role** associated with your Airflow cluster has the necessary permissions to access secrets.
+- Install the required Python libraries for interacting with the database by including them in your **requirements.txt** file.
 
 Steps to create and properly set up Airflow cluster:
-### 1. Make sure your VPC is set up correctly to host Airflow cluster
-   You can check the networking requirements with AWS documentation [here](https://docs.aws.amazon.com/mwaa/latest/userguide/networking-about.html).  
-   Alternatively, you can create a new VPC using a cloudformation template from this article's git source code: cloudformation\010_vpc.yaml:
+### 1. Ensure your VPC is set up correctly to host Airflow cluster
+Before setting up the Airflow cluster, make sure your Virtual Private Cloud (VPC) meets the necessary networking requirements. You can refer to the AWS documentation for networking requirements [here](https://docs.aws.amazon.com/mwaa/latest/userguide/networking-about.html).
+
+Alternatively, you can create a new VPC using the provided CloudFormation template from the Git source code of this article. Execute the following commands:
 ```bash
   export project_name="mwaa-secrets-demo"
   export stack_name="cfrm-${project_name}-010-vpc"
@@ -45,11 +43,11 @@ Steps to create and properly set up Airflow cluster:
     --no-fail-on-empty-changeset \
     --parameter-overrides ProjectName=$project_name
 ```
-*Note: we use project_name value as a part of the name of each resource in this demo.*
+*Note: we use `project_name` value as a part of the name of each resource in this demo.*
 
 ### 2. Create S3 bucket for Airflow Cluster and upload sample DAGs and requirements.txt files there
 
-2.1 S3 creation via CloudFormation Stack:
+2.1 S3 creation using a CloudFormation Stack:
 ```bash
   export project_name="mwaa-secrets-demo"
   export stack_name="cfrm-${project_name}-015-s3"
@@ -61,8 +59,10 @@ Steps to create and properly set up Airflow cluster:
     --parameter-overrides ProjectName=$project_name
 ```    
 
-2.2 Deploy DAGs and requirements.txt
+2.2 Deploy the DAGs and requirements.txt file
+
 *Note: script determines s3 bucket name dynamically. If you changed the bucket name in previous step - please make changes to the following script accordingly*
+
 ```bash
   export project_name="mwaa-secrets-demo"
   account_id=$(aws sts get-caller-identity --query "Account" --output text | tr -d '\r')
@@ -73,8 +73,7 @@ Steps to create and properly set up Airflow cluster:
 
 ### 3. Create Managed Airflow cluster and its IAM Role
 
-Notes:
-- Airflow cluster requires security_group_id and private subnets ids as parameters. If you've created VPC using a template in step 1 - first commands of a script will pick the values automatically. Otherwise, replace cloudformation deploy command parameters with your values.
+*Notes: Airflow cluster requires security_group_id and private subnets ids as parameters. If you've created VPC using a template in step 1 - first commands in the script will automatically fetch the values. Otherwise, replace the parameters in the cloudformation deploy command with your own values.*
 
 ```bash
   export project_name="mwaa-secrets-demo"
@@ -97,17 +96,17 @@ Notes:
     --capabilities CAPABILITY_NAMED_IAM
 ```   
 
-This cloudformation stack contains:
-- IAM policy which allows MWAA environment to read values of stored secrets (Requirement #1 mentioned above).
+This cloudformation stack includes the following components:
+- IAM policy that allows MWAA environment to read the values of stored secrets (Requirement #1 mentioned above).
 ![IAM Policy to access Secrets Manager values](images/iam_policy_secrets.png)
 
 - MWAA Environment definition with the following important settings:
 ![IAM Policy to access Secrets Manager values](images/mwaa_definition.png)
-    1. Reference to file requirements.txt containing list of database interaction libraries (Requirement #2 mentioned above)
-    2. Declaring Secrets Manager as a backend used for storing/retrieving connection and variable values
-    3. Local OS variables definition which is discussed in next section for working with Variables
+    1. A reference to file requirements.txt, which contains list of database interaction libraries (Requirement #2 mentioned above)
+    2. Declaration of Secrets Manager as the backend used for storing and retrieving connection and variable values.
+    3. Definition of local OS variables, which will be discussed in the next section regarding working with variables.
 
-Sample content of **requirements.txt** file (assuming we are going to use MySQL and PostreSQL databases):
+Here's a sample content of **requirements.txt** file (assuming we're using MySQL and PostreSQL databases):
 ```
 apache-airflow[mysql]
 apache-airflow[postgres]
