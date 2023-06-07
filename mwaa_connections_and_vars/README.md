@@ -213,45 +213,141 @@ DAG contains three operators:
 
 ## Using Variable values (Secrets / OS local variable)
 
-<<todo:>> All resources created in previous steps
+Now let's take a look at several ways to define variables in Airflow.
 
 ![High-level description](images/high-level-variables.png)
 
+The first one is to define those using AWS Secrets Manager (very similar to working with connection we described above).  
+
+Another method is to define OS environment variables, which is more suitable for rarely changing values (one of real-life examples -
+is to define environment-name (dev/qa/prod)).
+
+If you have followed cluster set up steps from previous section, all variables are already ready to use.
+Let's proceed and test those.
+
 ### Retrieving variable value from Secrets Manager
 
-<<todo:>>
-0. screenshots how they are defined
-1. demo_variable_secrets_dag.py
-3. Usage result
+MWAA cluster settings done in cloudformation\020_mwaa.yaml (variables_prefix):
+```yaml
+      AirflowConfigurationOptions:
+        secrets.backend: airflow.providers.amazon.aws.secrets.secrets_manager.SecretsManagerBackend
+        secrets.backend_kwargs: !Sub '{"connections_prefix" : "${ProjectName}/connections", "variables_prefix" : "${ProjectName}/variables"}'
+```
+
+Test variable is created in cloudformation\025_secrets_mysql_and_var.yaml:
+```yaml
+  SecretMWAATestVariable:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${ProjectName}/variables/test_variable'
+      SecretString: This is a Value of test variable (stored in secrets manager)
+```
+
+Now let's retrieve the value using demo_variable_secrets DAG:
+
+![demo_variable_secrets_dag](images/demo_variable_secrets_dag.png)
+
+```python
+  def print_vars_from_secret():
+      var_names = ['test_variable'] # searches for secret named "${ProjectName}/variables/test_variable"
+      for item in var_names:
+          value = Variable.get(item)
+          print(f"---> {item} : {value}")
+```
+
+The task output looks like this:
+```
+[2023-06-07, 20:38:34 UTC] {{logging_mixin.py:137}} INFO - ---> test_variable : This is a Value of test variable (stored in secrets manager)
+```
+
+As easy as that!
 
 ### Retrieving environment variable value
 
-<<todo:>>
-0. screenshots how they are defined
-1. demo_env_variable_dag.py
-2. All CAPS and "_" sign
-3. Usage result
+We have defined two environment variables whilst creating the cluster (cloudformation/020_mwaa.yaml):
+```yaml
+      AirflowConfigurationOptions:
+        ...
+        os_var.variable1: value1
+        env.variable2: 2023
+```
 
-### Variable comparison
+Now let's access those running demo_variable_env DAG:
+```python
+  def print_defined_vars():
+      var_names = ['AIRFLOW__OS_VAR__VARIABLE1','AIRFLOW__ENV__VARIABLE2']
 
-<<todo:>>
-1. Secrets
-  pros: can change value on the fly
-  cons: 
+      for item in var_names:
+          value = os.environ[item]
+          print(f"---> {item} : {value}")
+```
+**Please note the name change:**
+- CloudFormation template:
+  - os_var.variable1
+  - env.variable2
+- Accessing from DAG ("AIRFLOW_" prefix & all uppercase & "." is replaced by "__")
+  - AIRFLOW__OS_VAR__VARIABLE1
+  - AIRFLOW__ENV__VARIABLE2
 
-2. OS Variable
-  pros:
-  cons: change values -> Update env
+The output:
+```
+[2023-06-07, 20:51:06 UTC] {{logging_mixin.py:137}} INFO - ---> AIRFLOW__OS_VAR__VARIABLE1 : value1
+[2023-06-07, 20:51:06 UTC] {{logging_mixin.py:137}} INFO - ---> AIRFLOW__ENV__VARIABLE2 : 2023
+```
 
+### Methods comparison
+
+Variables stored in AWS Secrets Manager provide more flexibility as you can change its the value just by modifying the secret.
+
+While for environment variable change you need to update cluster settings, which is time-consuming operation (taking 20-30 minutes).
+
+The downside of secret-based variables is the fact you are charged for each secret stored.
 
 
 ## Considerations when using Connections and Variables in Secrets Manager
 
-<<todo:>> - pricing
+Please don't forget your are charged for storing and accessing each secret.
+Current price is $0.40 per secret per month and $0.05 per 10 000 API calls (pricing might be subject to change, so check the actual charges in [AWS Documentation] (https://aws.amazon.com/secrets-manager/pricing/?nc1=h_ls) )
 
 ## Clean Up
 
-<<todo:>>
+Here are the step to clean up demonstrational resources we've created in this guide:
+
+### 1. Delete secrets
+
+```bash
+export project_name="mwaa-secrets-demo"
+aws secretsmanager delete-secret --secret-id ${project_name}/connections/aurora_mysql_uri --force-delete-without-recovery 
+aws secretsmanager delete-secret --secret-id ${project_name}/connections/aurora_mysql_json --force-delete-without-recovery 
+aws secretsmanager delete-secret --secret-id ${project_name}/connections/aurora_postgresql_uri --force-delete-without-recovery 
+aws secretsmanager delete-secret --secret-id ${project_name}/connections/aurora_postgresql_json --force-delete-without-recovery 
+aws secretsmanager delete-secret --secret-id ${project_name}/variables/test_variable --force-delete-without-recovery 
+
+export stack_name="cfrm-${project_name}-025-secrets-mysql-and-var"
+
+  aws cloudformation delete-stack --stack-name ${stack_name}
+  aws cloudformation wait stack-delete-complete --stack-name ${stack_name}
+
+export stack_name="cfrm-${project_name}-030-secrets-postgresql"
+
+  aws cloudformation delete-stack --stack-name ${stack_name}
+  aws cloudformation wait stack-delete-complete --stack-name ${stack_name}  
+```    
+
+*Note: we included explicit Secret deletion (not via CloudFormation) with "force-delete-without-recovery".
+It makes possible to delete and recreate sample stacks multiple times.  
+Otherwise, AWS performs "soft delete" of the secret and it will lead to an error if you try to create stack within next 30 days.*
+
+
+### 2. Delete Airflow Cluster
+
+```bash
+export project_name="mwaa-secrets-demo"
+export stack_name="cfrm-${project_name}-020-mwaa"
+
+  aws cloudformation delete-stack --stack-name ${stack_name}
+  aws cloudformation wait stack-delete-complete --stack-name ${stack_name}
+```    
 
 ### x. Delete VPC Stack
 
