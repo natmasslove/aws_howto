@@ -23,15 +23,15 @@ Add diagrams
 
 ## Settings in your Airflow cluster to work with Secrets Manager and connect to DB
 
-In this section we walk you through the process of creating (or modifying) Airflow cluster.
+In this section we will walk you through the process of creating (or modifying) Airflow cluster.  
 Apart from usual, there are additional requirements for our use-case are:
 1. *IAM Role* associated with you Airflow cluster should have permissions to access secrets
 2. Python Libraries to interact with database should be installed (via *requirements.txt* file)
 
 Steps to create and properly set up Airflow cluster:
 ### 1. Make sure your VPC is set up correctly to host Airflow cluster
-   You can check the networking requirements with AWS documentation here: https://docs.aws.amazon.com/mwaa/latest/userguide/networking-about.html
-   Alternatively, you can create a new VPC using a cloudformation template from git source code: cloudformation\010_vpc.yaml:
+   You can check the networking requirements with AWS documentation [here](https://docs.aws.amazon.com/mwaa/latest/userguide/networking-about.html).  
+   Alternatively, you can create a new VPC using a cloudformation template from this article's git source code: cloudformation\010_vpc.yaml:
 ```bash
   export project_name="mwaa-secrets-demo"
   export stack_name="cfrm-${project_name}-010-vpc"
@@ -100,9 +100,9 @@ This cloudformation stack contains:
 
 - MWAA Environment definition with the following important settings:
 ![IAM Policy to access Secrets Manager values](images/mwaa_definition.png)
-    - Reference to file requirements.txt containing list of database interaction libraries (Requirement #2 mentioned above)
-    - Declaring Secrets Manager as a backend used for storing/retrieving connection and variable values
-    - Local OS variables definition which is discussed in next section for working with Variables
+    1. Reference to file requirements.txt containing list of database interaction libraries (Requirement #2 mentioned above)
+    2. Declaring Secrets Manager as a backend used for storing/retrieving connection and variable values
+    3. Local OS variables definition which is discussed in next section for working with Variables
 
 Sample content of **requirements.txt** file (assuming we are going to use MySQL and PostreSQL databases):
 ```
@@ -143,7 +143,7 @@ apache-airflow[postgres]
 
 <<todo:>>
 0. screenshots how they are defined
-1. demo_variable_os_dag.py
+1. demo_env_variable_dag.py
 2. All CAPS and "_" sign
 3. Usage result
 
