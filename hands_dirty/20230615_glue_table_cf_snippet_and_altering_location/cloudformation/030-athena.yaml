@@ -1,0 +1,48 @@
+Parameters:
+  ProjectName:
+    Description: ProjectName used also as Airflow EnvironmentName and used in Tags
+    Type: String
+
+#####################################
+
+Resources:
+  SampleDB:
+   Type: AWS::Glue::Database
+   Properties:
+     CatalogId: !Ref AWS::AccountId
+     DatabaseInput:
+       Name: !Sub "db-${ProjectName}"
+       Description: !Sub "Sample DB for ${ProjectName}"
+
+  GlueTable:
+    Type: 'AWS::Glue::Table'
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: !Ref SampleDB
+      TableInput:
+        Name: sample_table
+        Description: 'Table for the CSV dataset'
+        TableType: EXTERNAL_TABLE
+        Parameters:
+          skip.header.line.count: '1'
+          classification: csv
+        StorageDescriptor:
+          Columns:
+            - Name: ID
+              Type: int
+            - Name: Name
+              Type: string
+            - Name: Age
+              Type: int
+            - Name: Version
+              Type: string
+          Location: !Sub "s3://s3-${ProjectName}-${AWS::AccountId}/sample/dataset_a/"
+          InputFormat: org.apache.hadoop.mapred.TextInputFormat
+          OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
+          SerdeInfo:
+            SerializationLibrary: org.apache.hadoop.hive.serde2.OpenCSVSerde
+            Parameters:
+              separatorChar: ','
+              quoteChar: '"'
+              escapeChar: '\'
+              serialization.format: '1'
