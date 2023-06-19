@@ -11,8 +11,6 @@ One particularly useful integration is with AWS Secrets Manager, which allows yo
 
 In this guide, we'll walk you through the step-by-step process of setting up and utilizing Secrets Manager-based connections and variables. Additionally, we've included CloudFormation templates and sample DAGs code, so you can easily integrate this solution into your project.
 
-You can find the full source code in the following Git Repository: https://github.com/natmasslove/aws_howto/tree/mwaa_connections_and_vars/mwaa_connections_and_vars
-
 ## Secrets manager-based Connections: How it works
 
 A diagram below represents on a high-level how connections are referenced in Airflow DAGs and how connection details are retrieved from AWS Secrets manager.  
