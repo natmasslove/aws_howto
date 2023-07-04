@@ -1,0 +1,58 @@
+Parameters:
+  ArtifactsBucketName:
+    Description: Name of artifacts contining bucket
+    Type: String
+
+Resources:
+  ArtifactsS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref ArtifactsBucketName
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+
+  GlueIAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub 'iamr-wheeltest-glue'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole            
+      Policies:
+        - PolicyName: iamp-glue-s3
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:ListBucket'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${ArtifactsBucketName}'
+                  - !Sub 'arn:aws:s3:::${ArtifactsBucketName}/*'
+
+  TestGlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Command:
+        Name: pythonshell
+        PythonVersion: 3.9
+        ScriptLocation: !Sub "s3://${ArtifactsBucketName}/glue/glue_script.py"
+      DefaultArguments:
+        "--extra-py-files": !Sub 's3://${ArtifactsBucketName}/glue/project_helpers-0.1-py3-none-any.whl'        
+      ExecutionProperty:
+        MaxConcurrentRuns: 1
+      MaxRetries: 0
+      Name: !Sub 'gluej-wheeltest'
+      Role: !GetAtt GlueIAMRole.Arn
