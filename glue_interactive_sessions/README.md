@@ -102,8 +102,56 @@ It will take some time (around 30-40 second) to get ready and we can start devel
 
 Note: The moment after session creation is when he billing starts.
 
-<<todo step to debug>>
+4. Now let's do some coding. We want to develop a simple flow which 
+- reads CSV data from S3 (we'll use a sample csv file containing data about 50 lakes on Earth)
+- converts it into Parquet and saves it to S3's output folder
+- aggregates data and shows number of lakes per continent in this dataset
+
+Upload sample data onto S3:
+- create S3 bucket (we use "s3-glueintsessionsdemo-data" in this article, while you'll need to come up with your own name)
+- upload lakes.csv file (from "sample_data" git folder) into "in/lakes/"
+
+5. Let' add some cells into our notebook:
+
+**Reading data** (don't forget s3_bucket_name value with your bucket):
+```python
+# Declaring the S3 bucket name variable
+s3_bucket_name = "s3-glueintsessionsdemo-data"
+
+# 1. Read dataframe directly from s3 object using the variable
+df = spark.read.option("header", "true").option("inferSchema", "true").csv(f"s3://{s3_bucket_name}/in/lakes/")
+```
+
+**Writing in Parquet format**:
+```python
+# 2. Convert it into parquet format and writes to specified S3 path using the variable
+df.write.mode("overwrite").parquet(f"s3://{s3_bucket_name}/out/lakes/")
+```
+
+**Aggregate and output**:
+```python
+# 3. Prepare aggregated dataframe
+agg_df = df.groupBy("continent").count().withColumnRenamed("count", "number_of_lakes")
+
+# Write aggregated dataframe to another S3 path using the variable
+agg_df.write.mode("overwrite").parquet(f"s3://{s3_bucket_name}/out/lakes/aggregated/")
+
+# Outputs dataframe
+agg_df.show()
+```
+
+**Stopping Interactive session**:
+```python
+%stop_session
+```
 
 ## Converting the Notebook into Glue Job script
 
 <<todo>>
+
+
+## Clean Up
+
+<<todo>>
+1. empty S3 bucket and delete it
+2. delete cloudformation template
