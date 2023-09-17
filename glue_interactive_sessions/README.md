@@ -147,6 +147,19 @@ agg_df.show()
 
 ## Converting the Notebook into Glue Job script
 
+nbconvert is the tool which is recommended to convert your notebook file into a python script for a glue job.
+
+1. Installing nbconvert:
+```shell
+pip install nbconvert
+```
+
+2. Using nbconvert CLI to convert:
+```shell
+jupyter nbconvert --to script glueintsessionsdemo.ipynb
+```
+Then you just need to remove Jupyter Magics and your script is ready!
+
 <<todo>>
 
 
