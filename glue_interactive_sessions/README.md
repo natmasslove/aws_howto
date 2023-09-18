@@ -38,7 +38,7 @@ aws cloudformation deploy --template-file cloudformation/gluerole.yaml --stack-n
 Please note the ARN of IAM Role in CloudFormation stack's outputs. We will use it in Jupyter session initialization.
 
 This IAM Role contains:
-- Managed Service policies for Glue Interactive Sessions
+- Managed Service policy for Glue Interactive Sessions
 - You can add your own policies here. For example, if you you need to read/write S3 objects - it would required additional policy attached to the role. Solely for demo purposes we use AmazonS3FullAccess policy here instead of fine-grained one.
 
 3. Configure you AWS credentials
@@ -48,7 +48,19 @@ The easiest way to give user sufficient privileges are:
 - add AWSGlueConsoleFullAccess managed policy
 - add policy allowing iam:PassRole on a role created before
 
-That's how it could look like (replace with your values)
+Sample JSON definition for the policy:
+```json
+        {
+            "Sid": "passrole",
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole"
+            ],
+            "Resource": "arn:aws:iam::<<your account id>>:role/iamr-glueintsessionsdemo"
+        }
+```
+
+That's how credentials could look like in .credentials file (replace with your values)
 ```ini
 [profile_for_article]
 region=<put your region here>
@@ -57,9 +69,30 @@ aws_secret_access_key=<put your secret access key here>
 ```
 We will use profile named "profile_for_article" from now on.
 
-<<todo>>
-
 ## Starting your Jupyter Notebook and debugging the code
+
+Now we have everything set up to start developing our Glue Job
+
+### Sample Glue Job idea
+
+Glue Job:
+- takes s3 bucket name (containing input and output data) as a parameter
+- reads CSV data from S3 (we'll use a sample csv file containing data about 50 lakes on Earth)
+- converts data into Parquet and stores it into S3 output folder
+- aggregates data (number of lakes per continent)
+- stores aggregated data as an Iceberg table (and outputs dataframe content as well)
+
+So, in this demo we'll take a look at several additional aspects:
+- how to emulate parameters passed to a Glue Job
+- how to set up interactive session (and, later, your Glue Job) to work with Open Table Formats (such as Iceberg).
+
+Code is available in glueintsessionsdemo.ipynd notebook file and we'll guide you through the steps in the next section.
+
+We need to prepare sample data onto S3:
+- create S3 bucket (we use "s3-glueintsessionsdemo-data" in this article, while you'll need to come up with your own name)
+- upload lakes.csv file (from "sample_data" git folder) into "in/lakes/"
+
+### Let's implement it
  
 1. Let's start a new Jupyter Notebook:
 
@@ -84,7 +117,29 @@ jupyter notebook
 %number_of_workers - you can choose required number of workers (while 2 is minimum). It depends on the processing power you need. Here we
 keep it as small as possible for demo purposes.
 
-3. Now let's start our session:
+3. Next we need to preconfigure our session:
+
+The following %%configure magic emulates Glue Job parameter:
+```python
+%%configure
+{
+    "--s3_bucket_name" : "s3-glueintsessionsdemo-data"
+}
+```
+
+This cell add several more settings (which for a glue job should be also passed as parameters).
+These settings are required to enable using Iceberg format.
+Don't forget to replace s3 bucket name with your value.
+
+```python
+%%configure
+{
+    "--datalake-formats" : "iceberg",
+    "--conf" : "spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions --conf spark.sql.catalog.glue_catalog=org.apache.iceberg.spark.SparkCatalog --conf spark.sql.catalog.glue_catalog.warehouse=s3://s3-glueintsessionsdemo-data/iceberg/ --conf spark.sql.catalog.glue_catalog.catalog-impl=org.apache.iceberg.aws.glue.GlueCatalog --conf spark.sql.catalog.glue_catalog.io-impl=org.apache.iceberg.aws.s3.S3FileIO"
+}
+```
+
+4. Now let's start our session:
 ```python
 import sys
 from awsglue.transforms import *
@@ -98,28 +153,19 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 ```
 This code is identical to what we have in the beginning of our typical Glue Job.
-It will take some time (around 30-40 second) to get ready and we can start developing our code!
+It will take some time (around 40 seconds) to get ready and we can start developing our code!
 
 Note: The moment after session creation is when he billing starts.
 
-4. Now let's do some coding. We want to develop a simple flow which 
-- reads CSV data from S3 (we'll use a sample csv file containing data about 50 lakes on Earth)
-- in our demo we show how to create code is S3 bucket name was a parameter for a Glue Job
-- converts it into Parquet and saves it to S3's output folder
-- aggregates data and shows number of lakes per continent in this dataset
+5. Spark code:
 
-Upload sample data onto S3:
-- create S3 bucket (we use "s3-glueintsessionsdemo-data" in this article, while you'll need to come up with your own name)
-- upload lakes.csv file (from "sample_data" git folder) into "in/lakes/"
+a. **Reading parameter value**:
 
-5. Let' add some cells into our notebook:
-
-a. We'd like to have **s3 bucket name as a parameter** for our future Glue Job. So, let's simulate this behavior inside Interactive Session (don't forget s3_bucket_name value with your bucket):
-```
-%%configure
-{
-    "--S3_BUCKET_NAME" : "s3-glueintsessionsdemo-data"
-}
+```python
+from awsglue.utils import getResolvedOptions
+parameter_name = 's3_bucket_name'
+args = getResolvedOptions(sys.argv,[parameter_name])
+s3_bucket_name = args[parameter_name]
 ```
 
 b. **Reading data**:
@@ -139,17 +185,34 @@ d. **Aggregate and output**:
 # 3. Prepare aggregated dataframe
 agg_df = df.groupBy("continent").count().withColumnRenamed("count", "number_of_lakes")
 
-# Write aggregated dataframe to another S3 path using the variable
-agg_df.write.mode("overwrite").parquet(f"s3://{s3_bucket_name}/out/lakes/aggregated/")
-
 # Outputs dataframe
 agg_df.show()
 ```
 
+e. **Write aggregated data into an Iceberg table**:
+```python
+# 4. Write aggregated dataframe to Iceberg table
+agg_df.createOrReplaceTempView("tmp_lakes")
+
+query = f"""
+CREATE TABLE IF NOT EXISTS glue_catalog.default.lakes_iceberg
+USING iceberg
+AS SELECT * FROM tmp_lakes
+"""
+spark.sql(query)
+```
+Note: Now you can also select data from this table using Athena.
+
+
 **Stopping Interactive session**:
+
+Once you finished debugging your code, you can stop interactive session.
+It will be stopped after timeout period (which we set up in the beginning), but the best approach is to do it explicitly.
+
 ```python
 %stop_session
 ```
+
 
 Here we have developed a really simple Glue Job. The benefits here was that even when we did something wrong we didn't have to re-run the whole Glue Job and wait till it's gets initialized to execute code to the failing point. We are able just to correct and re-run failing piece of code.
 
@@ -172,6 +235,16 @@ Then we just need to remove Jupyter Magics and your script is ready!
 
 ## Clean Up
 
-<<todo>>
-1. empty S3 bucket and delete it
-2. delete cloudformation template
+1. Empty S3 bucket and delete it
+2. Delete CloudFormation template
+
+```shell
+aws cloudformation delete-stack --stack-name cf-glueintsessiondemo-role
+```
+
+3. Delete table from Glue Catalog
+
+In AWS Athena query editor execute:
+```sql
+DROP TABLE lakes_iceberg;
+```
