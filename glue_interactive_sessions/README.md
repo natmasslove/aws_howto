@@ -104,6 +104,7 @@ Note: The moment after session creation is when he billing starts.
 
 4. Now let's do some coding. We want to develop a simple flow which 
 - reads CSV data from S3 (we'll use a sample csv file containing data about 50 lakes on Earth)
+- in our demo we show how to create code is S3 bucket name was a parameter for a Glue Job
 - converts it into Parquet and saves it to S3's output folder
 - aggregates data and shows number of lakes per continent in this dataset
 
@@ -113,22 +114,27 @@ Upload sample data onto S3:
 
 5. Let' add some cells into our notebook:
 
-**Reading data** (don't forget s3_bucket_name value with your bucket):
-```python
-# Declaring the S3 bucket name variable
-s3_bucket_name = "s3-glueintsessionsdemo-data"
+a. We'd like to have **s3 bucket name as a parameter** for our future Glue Job. So, let's simulate this behavior inside Interactive Session (don't forget s3_bucket_name value with your bucket):
+```
+%%configure
+{
+    "--S3_BUCKET_NAME" : "s3-glueintsessionsdemo-data"
+}
+```
 
+b. **Reading data**:
+```python
 # 1. Read dataframe directly from s3 object using the variable
 df = spark.read.option("header", "true").option("inferSchema", "true").csv(f"s3://{s3_bucket_name}/in/lakes/")
 ```
 
-**Writing in Parquet format**:
+c. **Writing in Parquet format**:
 ```python
 # 2. Convert it into parquet format and writes to specified S3 path using the variable
 df.write.mode("overwrite").parquet(f"s3://{s3_bucket_name}/out/lakes/")
 ```
 
-**Aggregate and output**:
+d. **Aggregate and output**:
 ```python
 # 3. Prepare aggregated dataframe
 agg_df = df.groupBy("continent").count().withColumnRenamed("count", "number_of_lakes")
@@ -145,9 +151,13 @@ agg_df.show()
 %stop_session
 ```
 
+Here we have developed a really simple Glue Job. The benefits here was that even when we did something wrong we didn't have to re-run the whole Glue Job and wait till it's gets initialized to execute code to the failing point. We are able just to correct and re-run failing piece of code.
+
+Now as we have perfect code ready - let's convert it to Glue Job script.
+
 ## Converting the Notebook into Glue Job script
 
-nbconvert is the tool which is recommended to convert your notebook file into a python script for a glue job.
+nbconvert is the tool you can use to convert your notebook file into a python script for a glue job.
 
 1. Installing nbconvert:
 ```shell
@@ -158,10 +168,7 @@ pip install nbconvert
 ```shell
 jupyter nbconvert --to script glueintsessionsdemo.ipynb
 ```
-Then you just need to remove Jupyter Magics and your script is ready!
-
-<<todo>>
-
+Then we just need to remove Jupyter Magics and your script is ready!
 
 ## Clean Up
 
