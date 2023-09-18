@@ -14,8 +14,6 @@ In this guide, we'll walk you through:
 2. Debugging your Spark code within a Jupyter Notebook, replicating step-by-step Glue Job execution.
 3. Converting your Jupyter Notebook into Glue Job script.
 
-Note: Using Interactive sessions is billed based on DPU you use (which correlates to number of workers). Minimum is 2 workers = 2 DPUs, so based on current pricing it's $0.80/hour total. This might be considered as approach's downside, but it is outweighted, in our opinion, by the development acceleration.
-
 Note: The use of Interactive sessions incurs charges based on the DPU (which relates to the number of workers) you use. The minimum requirement is 2 workers, equating to 2 DPUs, costing $0.80/hour in total (as per current pricing). While some may view this as a drawback, the substantial speed-up in development, in our perspective, more than compensates for the cost.
 
 ## Setting Up Interactive Sessions
