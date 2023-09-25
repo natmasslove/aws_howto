@@ -11,6 +11,7 @@ Here I wanted to provide solutions which you can easily take and adjust for your
 
 * [Guide for setting up Glue Jobs and Connections to work with Snowflake and SAP](glue_connections_snowflake_sap/README.md)
 * [How to setup and use connections and variables in AWS managed Apache Airflow](mwaa_connections_and_vars/README.md)
+* [How to accelerate your Glue Job development with Glue Interactive Sessions](glue_interactive_sessions/README.md)
 
 # Getting-Hands-Dirty section:
 
