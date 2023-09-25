@@ -79,7 +79,7 @@ With our setup complete, it's time to dive into the development of our Glue Spar
 ### Sample Glue Job idea
 
 Here's a brief overview of the intended Glue Job functionality:
-- Get s3 bucket name (containing input and output data) as a parameter
+- Get S3 bucket name (containing input and output data) as a parameter
 - Read CSV data from S3 (we'll use a sample csv file containing data about 50 lakes on Earth)
 - Process this data by converting it from CSV to Parquet format, and then saving it in an S3 output folder
 - Aggregate the data to calculate the number of lakes per continent
@@ -116,7 +116,7 @@ jupyter notebook
 %number_of_workers 2
 ```
 
-**%idle_timeout** - The number of minutes of inactivity after which session is stopped. A nice feature to ensure you don't inadvertently inflate your AWS bill due to forgotten active sessions.
+**%idle_timeout** - The number of minutes of inactivity after which session is stopped. A nice feature to ensure you don't inadvertently inflate your AWS bill due to forgotten active sessions.  
 **%number_of_workers** - Lets you specify the desired number of workers (while 2 is minimum). It depends on the processing power you need. Here we
 keep it at the bare minimum for demo purposes.
 
