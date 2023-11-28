@@ -3,7 +3,7 @@ import boto3
 import uuid
 from lib.aws.timestream_manager import TimestreamTableWriter
 
-# This tests how to insert more old records (older than <x> hours into a table)
+# These tests show how to insert more old records (older than <x> hours into a table)
 # In this script we are experimenting with a table which has
 # EnableMagneticStoreWrites: false
 # (which is a default option or you can switch it off explicitly)

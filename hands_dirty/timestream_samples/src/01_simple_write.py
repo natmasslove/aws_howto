@@ -3,7 +3,7 @@ import boto3
 import uuid
 from lib.aws.timestream_manager import TimestreamTableWriter
 
-# This tests how to insert more than 100 records (uses TimestreamTableWriter batched method to write)
+# These tests show how to insert more than 100 records (uses TimestreamTableWriter batched method to write)
 
 DB_NAME = "timestream-sample-db"
 TABLE_NAME = "poc-table-01-batch-write"

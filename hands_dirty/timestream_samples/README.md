@@ -5,7 +5,7 @@
 
 This short case study provides:
 - several code examples on writing records into AWS Timestream tables, getting table properties
-- research on write records limitations (limits due to table configutation and, also, AWS service limitations)
+- research on write records limitations (limits due to table configuration and, also, AWS service limitations)
 
 ## Resources
 
@@ -62,3 +62,8 @@ Outcome: If you want to write a record which has "Time" from X hours ago (insert
 - if X is within Z_DAYS interval (i.e Z_DAYS * 24) - success
 - older than Z_DAYS - record rejected (actually, to be rejected the record has to be Z_DAYS + 1 days old as experiment proves. 
 But you've got the idea :) )
+
+### 04. Common attributes
+
+In this script we provide a snippet on how to work with attributes which contains the same value for all records we are going to write.
+We can declare these common attributes and pass it just once, not for each record.

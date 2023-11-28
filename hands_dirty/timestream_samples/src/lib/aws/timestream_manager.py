@@ -49,6 +49,18 @@ class TimestreamTableWriter:
 
     @staticmethod
     def print_rejected_records_exceptions(err):
+        """
+        Prints detailed information about rejected records exceptions.
+
+        This method is useful for debugging when the Timestream write client rejects records.
+
+        Args:
+            err: The exception object received from the Timestream write client which contains
+                 details about the rejected records.
+
+        Returns:
+            None
+        """        
         print("RejectedRecords: ", err)
         for rr in err.response["RejectedRecords"]:
             print("Rejected Index " + str(rr["RecordIndex"]) + ": " + rr["Reason"])
@@ -57,6 +69,18 @@ class TimestreamTableWriter:
 
     @staticmethod
     def epoch_milliseconds_str(epoch_seconds: float = None) -> str:
+        """
+        Converts epoch time in seconds to a string representation in milliseconds.
+
+        If no argument is provided, the current time is used. 
+
+        Args:
+            epoch_seconds (float, optional): The epoch time in seconds. If None,
+                                             the current time is used. Defaults to None.
+
+        Returns:
+            str: The epoch time in milliseconds as a string.
+        """        
         tmp = epoch_seconds if epoch_seconds is not None else time.time()
         return str(int(round(tmp * 1000)))
 
@@ -176,6 +200,12 @@ class TimestreamTableWriter:
         return responses
 
     def _get_table_props(self):
+        """
+        Retrieves the properties of the specified Timestream table. For internal use.
+
+        Returns:
+            dict: A dictionary containing the properties of the table.
+        """        
         try:
             result = self.timestream_write_client.describe_table(
                 DatabaseName=self.db_name, TableName=self.table_name
@@ -188,6 +218,12 @@ class TimestreamTableWriter:
             raise (TimestreamTableWriterException(error_message))
 
     def get_MemoryStoreRetentionPeriodInHours(self):
+        """
+        Gets the Memory Store retention period in hours for the Timestream table.
+
+        Returns:
+            int: The retention period of the Memory Store in hours.
+        """        
         table_props = self._get_table_props()
 
         try:
@@ -202,6 +238,13 @@ class TimestreamTableWriter:
             raise (TimestreamTableWriterException(error_message))
 
     def get_MagneticStoreRetentionPeriodInDays(self):
+        """
+        Gets the Magnetic Store retention period in days for the Timestream table.
+
+        Returns:
+            int: The retention period of the Magnetic Store in days.
+        """
+
         table_props = self._get_table_props()
 
         try:

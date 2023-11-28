@@ -52,20 +52,8 @@ Resources:
         MagneticStoreRetentionPeriodInDays: 5
       TableName: poc-table-03-older-records-magnetic
 
-  # # TestTable040:
-  # #   Type: AWS::Timestream::Table
-  # #   Properties:
-  # #     DatabaseName: !Ref TestDatabase
-  # #     RetentionProperties: 
-  # #       memoryStoreRetentionPeriodInHours: 12
-  # #       magneticStoreRetentionPeriodInDays: 7
-  # #     TableName: poc-table-040
-
-  # # TestTable050:
-  # #   Type: AWS::Timestream::Table
-  # #   Properties:
-  # #     DatabaseName: !Ref TestDatabase
-  # #     RetentionProperties: 
-  # #       memoryStoreRetentionPeriodInHours: 12
-  # #       magneticStoreRetentionPeriodInDays: 7
-  # #     TableName: poc-table-050-common-attr
+  TestTable04:
+    Type: AWS::Timestream::Table
+    Properties:
+      DatabaseName: !Ref TestDatabase
+      TableName: poc-table-04-common-attributes
