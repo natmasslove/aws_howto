@@ -8,7 +8,8 @@ from lib.aws.timestream_manager import TimestreamTableWriter
 DB_NAME = "timestream-sample-db"
 TABLE_NAME = "poc-table-01-batch-write"
 
-ts_client = boto3.client('timestream-write')
+ts_client = boto3.client("timestream-write")
+
 
 def prepare_records(number_of_records: int):
     records = []
@@ -24,10 +25,12 @@ def prepare_records(number_of_records: int):
             {
                 "Name": "dim_two",
                 "Value": str(uuid.uuid1()),
-            }
+            },
         ]
-        
-        record_time = TimestreamTableWriter.epoch_milliseconds_str(epoch_seconds = epoch_seconds)
+
+        record_time = TimestreamTableWriter.epoch_milliseconds_str(
+            epoch_seconds=epoch_seconds
+        )
 
         records.append(
             {
@@ -44,22 +47,26 @@ def prepare_records(number_of_records: int):
 
 
 #########################################################
-print("STEP 1. prepare batch of <100 records and try to write those using 'simple' method, without splitting into batches")
+print(
+    "STEP 1. prepare batch of <100 records and try to write those using 'simple' method, without splitting into batches"
+)
 records = prepare_records(77)
 try:
     writer = TimestreamTableWriter(DB_NAME, TABLE_NAME, ts_client)
-    writer.write_records_simple(records) # naive method
+    writer.write_records_simple(records)  # naive method
     print("Written successfully")
 except Exception as ex:
     print(f"Error: {str(ex)}")
-# Result = SUCCESS    
+# Result = SUCCESS
 
 #########################################################
-print("STEP 2. prepare batch of >100 records and try to write those using 'simple' method, without splitting into batches")
+print(
+    "STEP 2. prepare batch of >100 records and try to write those using 'simple' method, without splitting into batches"
+)
 records = prepare_records(110)
 try:
     writer = TimestreamTableWriter(DB_NAME, TABLE_NAME, ts_client)
-    writer.write_records_simple(records) # naive method
+    writer.write_records_simple(records)  # naive method
     print("Written successfully")
 except Exception as ex:
     print(f"Error: {str(ex)}")
@@ -67,15 +74,14 @@ except Exception as ex:
 
 
 #########################################################
-print("STEP 3. prepare batch of >100 records and try to write those using batched method, where we split records into batches")
+print(
+    "STEP 3. prepare batch of >100 records and try to write those using batched method, where we split records into batches"
+)
 records = prepare_records(110)
 try:
     writer = TimestreamTableWriter(DB_NAME, TABLE_NAME, ts_client)
-    writer.write_records(records) # changed method
+    writer.write_records(records)  # changed method
     print("Written successfully")
 except Exception as ex:
-    print(f"Error: {str(ex)}")    
-# Result = SUCCESS      
-
-
-
+    print(f"Error: {str(ex)}")
+# Result = SUCCESS

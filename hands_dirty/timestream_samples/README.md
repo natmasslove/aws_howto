@@ -45,3 +45,20 @@ Also retention settings are applied to the table:
 Outcome: If you want to write a record which has "Time" from X hours ago (inserting event from the past)
 - if X <= Y_HOURS (see retention settings) - record is written successfully
 - if X > Y_HOURS - record is rejected (if it fits into total Z_DAYS retention interval)
+
+### 03. Writing records from the past into a table. Part 2.
+
+In Part 2 we use timestream table which has "EnableMagneticStoreWrites" option ON.
+```yaml
+  TestTable03:
+    Type: AWS::Timestream::Table
+    Properties:
+      DatabaseName: !Ref TestDatabase
+      MagneticStoreWriteProperties:
+        EnableMagneticStoreWrites: true
+```
+
+Outcome: If you want to write a record which has "Time" from X hours ago (inserting event from the past)
+- if X is within Z_DAYS interval (i.e Z_DAYS * 24) - success
+- older than Z_DAYS - record rejected (actually, to be rejected the record has to be Z_DAYS + 1 days old as experiment proves. 
+But you've got the idea :) )

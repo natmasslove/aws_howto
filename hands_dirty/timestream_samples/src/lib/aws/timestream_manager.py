@@ -6,6 +6,7 @@ import time
 
 class TimestreamTableWriterException(Exception):
     """Exception raised for errors encountered while interacting with TimeStream DB."""
+
     pass
 
 
@@ -23,8 +24,10 @@ class TimestreamTableWriter:
     Methods:
         write_records(records): Writes a list of records to the Timestream table.
     """
-    
-    RECORDS_BATCH_SIZE = 100 # Maximum number of records inserted per one write (AWS Limit)
+
+    RECORDS_BATCH_SIZE = (
+        100  # Maximum number of records inserted per one write (AWS Limit)
+    )
 
     def __init__(self, db_name: str, table_name: str, timestream_write_client=None):
         """
@@ -51,7 +54,6 @@ class TimestreamTableWriter:
             print("Rejected Index " + str(rr["RecordIndex"]) + ": " + rr["Reason"])
             if "ExistingVersion" in rr:
                 print("Rejected record existing version: ", rr["ExistingVersion"])
-
 
     @staticmethod
     def epoch_milliseconds_str(epoch_seconds: float = None) -> str:
@@ -82,7 +84,6 @@ class TimestreamTableWriter:
             epoch_time = dt.timestamp()
             return TimestreamTableWriter.epoch_milliseconds_str(epoch_time)
 
-
     def write_records_simple(self, records):
         """
         Writes a list of records to the Timestream table.
@@ -100,22 +101,25 @@ class TimestreamTableWriter:
         try:
             result = self.timestream_write_client.write_records(
                 DatabaseName=self.db_name, TableName=self.table_name, Records=records
-            )            
-            print("WriteRecords Status: [%s]" % result['ResponseMetadata']['HTTPStatusCode'])
+            )
+            print(
+                "WriteRecords Status: [%s]"
+                % result["ResponseMetadata"]["HTTPStatusCode"]
+            )
             return result
         except self.timestream_write_client.exceptions.RejectedRecordsException as err:
             error_message = (
                 f"Records were rejected for {self.db_name}.{self.table_name}: {err}."
-            )            
+            )
             self.print_rejected_records_exceptions(err)
-            raise(TimestreamTableWriterException(error_message))
+            raise (TimestreamTableWriterException(error_message))
         except Exception as err:
             error_message = (
                 f"Error writing records into {self.db_name}.{self.table_name}: {err}."
-            )                        
-            raise(TimestreamTableWriterException(error_message))            
+            )
+            raise (TimestreamTableWriterException(error_message))
 
-    def _write_batch(self, records, common_attributes = {}):
+    def _write_batch(self, records, common_attributes={}):
         """
         Writes a single batch (up to 100 records) to the Timestream table.
 
@@ -130,23 +134,29 @@ class TimestreamTableWriter:
         """
         try:
             result = self.timestream_write_client.write_records(
-                DatabaseName=self.db_name, TableName=self.table_name, Records=records, CommonAttributes=common_attributes
+                DatabaseName=self.db_name,
+                TableName=self.table_name,
+                Records=records,
+                CommonAttributes=common_attributes,
             )
-            print("WriteRecords Status: [%s]" % result['ResponseMetadata']['HTTPStatusCode'])
+            print(
+                "WriteRecords Status: [%s]"
+                % result["ResponseMetadata"]["HTTPStatusCode"]
+            )
             return result
         except self.timestream_write_client.exceptions.RejectedRecordsException as err:
             error_message = (
                 f"Records were rejected for {self.db_name}.{self.table_name}: {err}."
-            )            
+            )
             self.print_rejected_records_exceptions(err)
-            raise(TimestreamTableWriterException(error_message))
+            raise (TimestreamTableWriterException(error_message))
         except Exception as err:
             error_message = (
                 f"Error writing records into {self.db_name}.{self.table_name}: {err}."
-            )                        
-            raise(TimestreamTableWriterException(error_message))            
-        
-    def write_records(self, records, common_attributes = {}):
+            )
+            raise (TimestreamTableWriterException(error_message))
+
+    def write_records(self, records, common_attributes={}):
         """
         Orchestrates the process of writing records to the Timestream table in batches of 100.
 
@@ -159,31 +169,48 @@ class TimestreamTableWriter:
         responses = []
 
         for i in range(0, len(records), self.RECORDS_BATCH_SIZE):
-            batch = records[i:i + self.RECORDS_BATCH_SIZE]
+            batch = records[i : i + self.RECORDS_BATCH_SIZE]
             response = self._write_batch(batch, common_attributes)
             responses.append(response)
 
-        return responses        
-
+        return responses
 
     def _get_table_props(self):
         try:
-            result = self.timestream_write_client.describe_table(DatabaseName=self.db_name, TableName=self.table_name)
-            return result            
+            result = self.timestream_write_client.describe_table(
+                DatabaseName=self.db_name, TableName=self.table_name
+            )
+            return result
         except Exception as err:
             error_message = (
                 f"Error getting table info for {self.db_name}.{self.table_name}: {err}."
-            )                        
-            raise(TimestreamTableWriterException(error_message))            
-        
+            )
+            raise (TimestreamTableWriterException(error_message))
+
     def get_MemoryStoreRetentionPeriodInHours(self):
         table_props = self._get_table_props()
 
         try:
-            value = table_props.get('Table').get('RetentionProperties').get('MemoryStoreRetentionPeriodInHours')
+            value = (
+                table_props.get("Table")
+                .get("RetentionProperties")
+                .get("MemoryStoreRetentionPeriodInHours")
+            )
             return int(value)
         except Exception as err:
-            error_message = (
-                f"Error getting MemoryStoreRetentionPeriodInHours for {self.db_name}.{self.table_name}: {err}."
-            )                        
-            raise(TimestreamTableWriterException(error_message))          
+            error_message = f"Error getting MemoryStoreRetentionPeriodInHours for {self.db_name}.{self.table_name}: {err}."
+            raise (TimestreamTableWriterException(error_message))
+
+    def get_MagneticStoreRetentionPeriodInDays(self):
+        table_props = self._get_table_props()
+
+        try:
+            value = (
+                table_props.get("Table")
+                .get("RetentionProperties")
+                .get("MagneticStoreRetentionPeriodInDays")
+            )
+            return int(value)
+        except Exception as err:
+            error_message = f"Error getting MagneticStoreRetentionPeriodInDays for {self.db_name}.{self.table_name}: {err}."
+            raise (TimestreamTableWriterException(error_message))
