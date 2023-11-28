@@ -1,0 +1,1 @@
+aws cloudformation deploy --stack-name cf-poc-timestream --template-file cloudformation/ts_tables.yaml

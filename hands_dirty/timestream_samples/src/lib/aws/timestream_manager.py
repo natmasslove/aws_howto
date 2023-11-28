@@ -1,0 +1,189 @@
+import boto3
+
+from datetime import datetime
+import time
+
+
+class TimestreamTableWriterException(Exception):
+    """Exception raised for errors encountered while interacting with TimeStream DB."""
+    pass
+
+
+class TimestreamTableWriter:
+    """
+    This class provides an interface to write records to a specified Amazon Timestream table as well as some helper methods.
+    It uses the AWS SDK for Python (Boto3) to interact with the Timestream service.
+
+    Attributes:
+        db_name (str): The name of the Timestream database.
+        table_name (str): The name of the Timestream table.
+        timestream_write_client: The Boto3 Timestream write client. If not provided,
+            a new client instance is created.
+
+    Methods:
+        write_records(records): Writes a list of records to the Timestream table.
+    """
+    
+    RECORDS_BATCH_SIZE = 100 # Maximum number of records inserted per one write (AWS Limit)
+
+    def __init__(self, db_name: str, table_name: str, timestream_write_client=None):
+        """
+        Initializes a new TimestreamTableWriter instance.
+
+        Args:
+            db_name (str): The name of the Timestream database.
+            table_name (str): The name of the Timestream table.
+            timestream_write_client: An optional Boto3 Timestream write client.
+                If none is provided, a new client instance will be created.
+        """
+        self.db_name = db_name
+        self.table_name = table_name
+        self.timestream_write_client = (
+            boto3.client("timestream-write")
+            if timestream_write_client is None
+            else timestream_write_client
+        )
+
+    @staticmethod
+    def print_rejected_records_exceptions(err):
+        print("RejectedRecords: ", err)
+        for rr in err.response["RejectedRecords"]:
+            print("Rejected Index " + str(rr["RecordIndex"]) + ": " + rr["Reason"])
+            if "ExistingVersion" in rr:
+                print("Rejected record existing version: ", rr["ExistingVersion"])
+
+
+    @staticmethod
+    def epoch_milliseconds_str(epoch_seconds: float = None) -> str:
+        tmp = epoch_seconds if epoch_seconds is not None else time.time()
+        return str(int(round(tmp * 1000)))
+
+    @staticmethod
+    def iso_time_to_epoch_milliseconds(iso_date: str) -> str:
+        """
+        Convert an ISO 8601 formatted date string to the number of milliseconds since the Unix epoch.
+        If the input is None, the current time in milliseconds since the Unix epoch is returned.
+
+        Parameters:
+        iso_date (str): An ISO 8601 formatted date string (e.g., "2023-11-21T21:39:09Z").
+                        If None, the current time is used.
+
+        Returns:
+        str: The number of milliseconds since the Unix epoch as a string.
+        """
+
+        # If the input is None, use the current time
+        if iso_date is None:
+            return TimestreamTableWriter.epoch_milliseconds_str()
+        else:
+            # Convert the ISO date string to a datetime object
+            dt = datetime.fromisoformat(iso_date.rstrip("Z"))
+            # Convert the datetime object to epoch time in seconds
+            epoch_time = dt.timestamp()
+            return TimestreamTableWriter.epoch_milliseconds_str(epoch_time)
+
+
+    def write_records_simple(self, records):
+        """
+        Writes a list of records to the Timestream table.
+        Naive approach - doesn't check if record list contains more than 100 records
+
+        Args:
+            records: A list of records to be written to the Timestream table.
+
+        Returns:
+            The response from the Timestream write_records API call.
+
+        Todo:
+            Introduce records buffering to support batches of less than 100 records.
+        """
+        try:
+            result = self.timestream_write_client.write_records(
+                DatabaseName=self.db_name, TableName=self.table_name, Records=records
+            )            
+            print("WriteRecords Status: [%s]" % result['ResponseMetadata']['HTTPStatusCode'])
+            return result
+        except self.timestream_write_client.exceptions.RejectedRecordsException as err:
+            error_message = (
+                f"Records were rejected for {self.db_name}.{self.table_name}: {err}."
+            )            
+            self.print_rejected_records_exceptions(err)
+            raise(TimestreamTableWriterException(error_message))
+        except Exception as err:
+            error_message = (
+                f"Error writing records into {self.db_name}.{self.table_name}: {err}."
+            )                        
+            raise(TimestreamTableWriterException(error_message))            
+
+    def _write_batch(self, records, common_attributes = {}):
+        """
+        Writes a single batch (up to 100 records) to the Timestream table.
+
+        Args:
+            records: A list of records to be written to the Timestream table.
+
+        Returns:
+            The response from the Timestream write_records API call.
+
+        Todo:
+            Introduce records buffering to support batches of less than 100 records.
+        """
+        try:
+            result = self.timestream_write_client.write_records(
+                DatabaseName=self.db_name, TableName=self.table_name, Records=records, CommonAttributes=common_attributes
+            )
+            print("WriteRecords Status: [%s]" % result['ResponseMetadata']['HTTPStatusCode'])
+            return result
+        except self.timestream_write_client.exceptions.RejectedRecordsException as err:
+            error_message = (
+                f"Records were rejected for {self.db_name}.{self.table_name}: {err}."
+            )            
+            self.print_rejected_records_exceptions(err)
+            raise(TimestreamTableWriterException(error_message))
+        except Exception as err:
+            error_message = (
+                f"Error writing records into {self.db_name}.{self.table_name}: {err}."
+            )                        
+            raise(TimestreamTableWriterException(error_message))            
+        
+    def write_records(self, records, common_attributes = {}):
+        """
+        Orchestrates the process of writing records to the Timestream table in batches of 100.
+
+        Args:
+            records: A list of records to be written to the Timestream table.
+
+        Returns:
+            A list of responses from the Timestream write_records API call for each batch.
+        """
+        responses = []
+
+        for i in range(0, len(records), self.RECORDS_BATCH_SIZE):
+            batch = records[i:i + self.RECORDS_BATCH_SIZE]
+            response = self._write_batch(batch, common_attributes)
+            responses.append(response)
+
+        return responses        
+
+
+    def _get_table_props(self):
+        try:
+            result = self.timestream_write_client.describe_table(DatabaseName=self.db_name, TableName=self.table_name)
+            return result            
+        except Exception as err:
+            error_message = (
+                f"Error getting table info for {self.db_name}.{self.table_name}: {err}."
+            )                        
+            raise(TimestreamTableWriterException(error_message))            
+        
+    def get_MemoryStoreRetentionPeriodInHours(self):
+        table_props = self._get_table_props()
+
+        try:
+            value = table_props.get('Table').get('RetentionProperties').get('MemoryStoreRetentionPeriodInHours')
+            return int(value)
+        except Exception as err:
+            error_message = (
+                f"Error getting MemoryStoreRetentionPeriodInHours for {self.db_name}.{self.table_name}: {err}."
+            )                        
+            raise(TimestreamTableWriterException(error_message))          
