@@ -15,9 +15,11 @@ Here I wanted to provide solutions which you can easily take and adjust for your
 
 # Getting-Hands-Dirty section:
 
-Here I put small "project" where I either explore new functionalities or create snippets to be re-used by "future myself" (or anyone else, of course 😃 )
+Here I put small "projects" where I either explore new functionalities or create snippets to be re-used by "future myself" (or anyone else, of course 😃 )
 
 * [How to use your own Python library in **Pythonshell** Glue Job](hands_dirty/20230704_glue_pythonshell_add_your_lib/README.md)
 * [Experiments with switching Athena table between two s3 locations](hands_dirty/20230615_glue_table_cf_snippet_and_altering_location/README.md)
+* [How Athena works with INSERT INTO commands for various table formats](hands_dirty/20230712_testing_athena_insert/README.md)
+* [Timestream samples and research](hands_dirty/timestream_samples/README.md)
 
 
