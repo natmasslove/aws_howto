@@ -21,5 +21,6 @@ Here I put small "projects" where I either explore new functionalities or create
 * [Experiments with switching Athena table between two s3 locations](hands_dirty/20230615_glue_table_cf_snippet_and_altering_location/README.md)
 * [How Athena works with INSERT INTO commands for various table formats](hands_dirty/20230712_testing_athena_insert/README.md)
 * [Timestream samples and research](hands_dirty/timestream_samples/README.md)
+* [EMR Serverless samples](hands_dirty/emr_serverless_sample/README.md)
 
 
