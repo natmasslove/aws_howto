@@ -14,17 +14,19 @@ Glue & EMR - for big data processing (specifically EMR serverless, as we are tal
 - In EMR Serverless you can run both Spark and HIVE job
 - In EMR Serverless: Spark written in pySpark, Scala, ...
 <<todo - check>>
-- In Glue - PySpark only
+- In Glue - Spark (Python and Scala)
 <<todo - check>>
 - In Glue you can run pure Python code cheaply (using 0.0625 workers capacity), but it's not a scope for this article
 
 ### Open-table format
 
-How it is easy to use Open table formats (Hudi, Iceberg, Delta Lake) with the technology.
+It is easy to setup both EMR Serverless and Glue to work with Open table formats (Hudi, Iceberg, Delta Lake).
 
 - In Glue you just provide job parameter (e.g. "--datalake-formats":"iceberg" and some minimal spark config)
-- In EMR <<todo - check>>
-https://www.youtube.com/watch?v=CIsdaooeVw4
+- In EMR provide spark configs such as
+spark.jars=/usr/lib/hudi/hudi-spark-bundle.jar
+- Using Open Table format is very well documented for both services
+
 
 ## Observability
 
@@ -59,6 +61,13 @@ https://www.youtube.com/watch?v=CIsdaooeVw4
 - Glue started back in <<todo check>>
 
 - Both has a very good documentation
+
+- Versions:
+  EMR Serverless is updated more often to catch up with latest Spark versions.
+  For example:
+  Glue : AWS Glue 4.0 -> Spark 3.3.0,  https://docs.aws.amazon.com/glue/latest/dg/release-notes.html
+  EMR Serverless: 6.15.0 -> Apache Spark	3.4.1
+  https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/release-versions.html
 
 ##  Features (?) <<todo rephrase>>
 
