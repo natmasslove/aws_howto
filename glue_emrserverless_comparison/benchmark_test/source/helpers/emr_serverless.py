@@ -145,8 +145,9 @@ def run_test(emr_client,
 
     end = time.perf_counter()
 
-    formatted_output = json.dumps(output, indent=4)
+    formatted_output = json.dumps(output, indent=4, default=str)
 
     # Print out Run stats
-    print(f"Output:\n{formatted_output}")
-    print(f"Total Running Time: {end - start:0.4f} seconds")
+    logger.info(f"Total Running Time: {end - start:0.4f} seconds")
+    logger.info(f"Output:\n{formatted_output}")
+    

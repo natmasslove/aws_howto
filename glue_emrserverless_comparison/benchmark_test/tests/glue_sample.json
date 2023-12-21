@@ -1,7 +1,11 @@
 [
     {
         "type" : "glue",
+        "run_name": "glue_sample_2workers",
         "script_name": "glue_scripts/glue_sample.py",
-        "job_name" : "gluej-runner-2-workers"
+        "job_name" : "gluej-runner-2-workers",
+        "arguments" : {
+            "--s3_bucket_name" : "{s3_bucket}"
+        }
     }
 ]

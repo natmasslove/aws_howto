@@ -42,7 +42,7 @@ with open(test_file_name,'r') as test_json_file:
 print(f"Test items: {test_items}")    
 
 # for each test item, run the test
-for test_item in test_items:
+for test_item in test_items:    
     item_type = test_item["type"]
     if item_type == "emr_serverless":
         # EMR Flow
@@ -51,12 +51,14 @@ for test_item in test_items:
         arguments = test_item["arguments"]
         sparkSubmitParameters = test_item["sparkSubmitParameters"]
         run_name = test_item["run_name"]
+        logger = get_logger(log_name=run_name)
+        logger.info(f"Processing test item: {json.dumps(test_item, indent=4, default=str)}")
 
         kwargs = {
             "emr_client": emr_client,
             "application_id": application_id,
             "execution_role_arn": execution_role_arn,
-            "logger": get_logger(log_name=run_name),
+            "logger": logger,
             "run_name": run_name,
             "local_script_fullpath": local_script_fullpath,
             "s3_bucket": s3_bucket,
@@ -76,13 +78,20 @@ for test_item in test_items:
         # }        
 
         emr_serverless_run_test(**kwargs)
-    elif item_type == "glue":
+
+    elif item_type == "glue":        
         script_name = test_item["script_name"]
         local_script_fullpath = os.path.join(SCRIPT_FOLDER, script_name)
+        arguments = test_item.get("arguments",{})
+        run_name = test_item["run_name"]
+        logger = get_logger(log_name=run_name)
+        logger.info(f"Processing test item: {json.dumps(test_item, indent=4, default=str)}")
         kwargs = {
             "glue_client" : glue_client,
             "local_script_fullpath" : local_script_fullpath,
             "job_name" : test_item["job_name"],
+            "arguments": arguments,
+            "logger": logger,
         }
 
         glue_run_test(**kwargs)
