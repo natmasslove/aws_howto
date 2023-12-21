@@ -1,5 +1,8 @@
 import time
+import json
 from datetime import datetime
+
+from helpers.s3_helper import upload_file_to_s3
 
 def start_job_run(
     emr_client,
@@ -87,12 +90,63 @@ def watch_job_run(emr_client, application_id, run_id, logger):
         logger.info(f"Waiting for totalResourceUtilization to be populated.")
 
     totalResourceUtilization = response["jobRun"]["totalResourceUtilization"]
+    billedResourceUtilization = response["jobRun"].get("billedResourceUtilization",{})
     totalExecutionDurationSeconds = response["jobRun"]["totalExecutionDurationSeconds"]
 
     output = {
         "state_durations" : state_durations,
         "totalResourceUtilization" : totalResourceUtilization,
+        "billedResourceUtilization" : billedResourceUtilization,
         "totalExecutionDurationSeconds" : totalExecutionDurationSeconds,
     }
 
     return output
+
+
+def run_test(emr_client,
+    application_id,
+    execution_role_arn,    
+    logger,   
+    run_name,
+    local_script_fullpath,
+    s3_bucket,
+    s3_script_path,
+    arguments,
+    sparkSubmitParameters = None):
+    
+    # upload current script version to S3
+    upload_file_to_s3(local_script_fullpath, s3_bucket, s3_script_path)
+
+    strtime = datetime.now().strftime("%Y%m%d%H%M%S")
+    run_name = f"{run_name}-{strtime}"
+
+    logger.info(f"Running script {s3_script_path}, using arguments: [{', '.join(arguments)}]")
+
+    start = time.perf_counter()
+
+    # Starting Job Run
+    job_run_id, response = start_job_run(
+        emr_client,
+        application_id,
+        f"s3://{s3_bucket}/{s3_script_path}",
+        arguments,
+        run_name,
+        execution_role_arn,    
+        logger,
+        sparkSubmitParameters,
+    )
+
+    logger.info(response)
+
+    # Waiting for Job Run to Complete and collect stats
+    output = watch_job_run(
+        emr_client, application_id, job_run_id, logger
+    )
+
+    end = time.perf_counter()
+
+    formatted_output = json.dumps(output, indent=4)
+
+    # Print out Run stats
+    print(f"Output:\n{formatted_output}")
+    print(f"Total Running Time: {end - start:0.4f} seconds")

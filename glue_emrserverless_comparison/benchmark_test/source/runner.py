@@ -1,16 +1,17 @@
 import os
-from datetime import datetime
-import time
+import json
+import argparse
 import boto3
+
 from helpers.common import get_logger
 from helpers.cloudformation import get_stack_outputs
-from helpers.s3_helper import upload_file_to_s3
-from helpers.emr_serverless import start_job_run, watch_job_run
-from time import strftime
-import json
+from helpers.emr_serverless import run_test as emr_serverless_run_test
 
 STACK_NAME = "cf-glue-vs-emr-serverless"
-SCRIPT_PATH = script_dir = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+
+emr_client = boto3.client("emr-serverless")
+glue_client = boto3.client("glue")
 
 #################################################################
 outputs = get_stack_outputs(STACK_NAME)
@@ -21,58 +22,64 @@ application_id = outputs["EMRServerlessApplicationId"]
 execution_role_arn = outputs["EMRServerlessRoleArn"]
 # Glue
 
-
 #################################################################
-# EMR Flow
-logger = get_logger(log_name="emrserverless")
 
-script_name = "emrserverless_scripts/emr_sample.py"
-upload_file_to_s3(os.path.join(SCRIPT_PATH, script_name), s3_bucket, script_name)
+# reads named arguments from command line (--test-file) [required]
+parser = argparse.ArgumentParser()
+parser.add_argument("--test-file", help="JSON test file name", required=True)
+args = parser.parse_args()
+test_file_name = args.test_file
 
-emr_client = boto3.client("emr-serverless")
+# read test items from a file
+test_items = None
+with open(test_file_name,'r') as test_json_file: 
+    # processing replacements
+    test_items_str = test_json_file.read()
+    test_items_str = test_items_str.replace("{s3_bucket}", s3_bucket)
+    test_items = json.loads(test_items_str)
 
-strtime = datetime.now().strftime("%Y%m%d%H%M%S")
-run_name = f"{script_name}-{strtime}"
-arguments = [s3_bucket]
+print(f"Test items: {test_items}")    
 
-logger.info(f"Running script {script_name}, using arguments: [{', '.join(arguments)}]")
+# for each test item, run the test
+for test_item in test_items:
+    item_type = test_item["type"]
+    if item_type == "emr_serverless":
+        # EMR Flow
+        script_name = test_item["script_name"]
+        local_script_fullpath = os.path.join(SCRIPT_FOLDER, script_name)
+        arguments = test_item["arguments"]
+        sparkSubmitParameters = test_item["sparkSubmitParameters"]
+        run_name = test_item["run_name"]
 
-# this is optional - just to demonstrate how you can change compute capacity allocation for the job run
-# you also can leave it empty sparkSubmitParameters = {}
-sparkSubmitParameters = {
-    "spark.hadoop.hive.metastore.client.factory.class" : "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory",    
-    "spark.executor.instances" : "1",
-    "spark.dynamicAllocation.initialExecutors" : "1",
-    "spark.dynamicAllocation.maxExecutors" : "1",
-    "spark.executor.cores" : "2",
-    "spark.executor.memory" : "8G",
-}
+        kwargs = {
+            "emr_client": emr_client,
+            "application_id": application_id,
+            "execution_role_arn": execution_role_arn,
+            "logger": get_logger(log_name=run_name),
+            "run_name": run_name,
+            "local_script_fullpath": local_script_fullpath,
+            "s3_bucket": s3_bucket,
+            "s3_script_path": script_name,
+            "arguments": arguments,
+            "sparkSubmitParameters": sparkSubmitParameters,
+        }
+        # this is optional - just to demonstrate how you can change compute capacity allocation for the job run
+        # you also can leave it empty sparkSubmitParameters = {}
+        # sparkSubmitParameters = {
+        #     "spark.hadoop.hive.metastore.client.factory.class" : "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory",
+        #     "spark.executor.instances" : "1",
+        #     "spark.dynamicAllocation.initialExecutors" : "1",
+        #     "spark.dynamicAllocation.maxExecutors" : "1",
+        #     "spark.executor.cores" : "2",
+        #     "spark.executor.memory" : "8G",
+        # }        
 
-start = time.perf_counter()
+        emr_serverless_run_test(**kwargs)
+    elif item_type == "glue":
+        print("Sorry, can't work with glue yet")
+        print(test_item)
+    else:
+        raise Exception(f"Unknown test item type: {item_type}")
 
-# Starting Job Run
-job_run_id, response = start_job_run(
-    emr_client,
-    application_id,
-    script_name,
-    arguments,
-    run_name,
-    execution_role_arn,    
-    logger,
-    sparkSubmitParameters,
-)
 
-logger.info(response)
 
-# Waiting for Job Run to Complete and collect stats
-output = watch_job_run(
-    emr_client, application_id, job_run_id, logger
-)
-
-end = time.perf_counter()
-
-formatted_output = json.dumps(output, indent=4)
-
-# Print out Run stats
-print(f"Output:\n{formatted_output}")
-print(f"Total Running Time: {end - start:0.4f} seconds")
