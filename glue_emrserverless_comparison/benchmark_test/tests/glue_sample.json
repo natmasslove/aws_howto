@@ -1,5 +1,7 @@
 [
     {
-        "type" : "glue"
+        "type" : "glue",
+        "script_name": "glue_scripts/glue_sample.py",
+        "job_name" : "gluej-runner-2-workers"
     }
 ]

@@ -6,6 +6,7 @@ import boto3
 from helpers.common import get_logger
 from helpers.cloudformation import get_stack_outputs
 from helpers.emr_serverless import run_test as emr_serverless_run_test
+from helpers.glue import run_test as glue_run_test
 
 STACK_NAME = "cf-glue-vs-emr-serverless"
 SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
@@ -76,8 +77,15 @@ for test_item in test_items:
 
         emr_serverless_run_test(**kwargs)
     elif item_type == "glue":
-        print("Sorry, can't work with glue yet")
-        print(test_item)
+        script_name = test_item["script_name"]
+        local_script_fullpath = os.path.join(SCRIPT_FOLDER, script_name)
+        kwargs = {
+            "glue_client" : glue_client,
+            "local_script_fullpath" : local_script_fullpath,
+            "job_name" : test_item["job_name"],
+        }
+
+        glue_run_test(**kwargs)
     else:
         raise Exception(f"Unknown test item type: {item_type}")
 

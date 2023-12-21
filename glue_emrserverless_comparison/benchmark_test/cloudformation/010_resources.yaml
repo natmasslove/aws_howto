@@ -76,24 +76,66 @@ Resources:
   SampleGlueJob:
     Type: AWS::Glue::Job
     Properties:
-      Name: gluej-runner-sample-job
+      Name: gluej-runner-2-workers
       GlueVersion: 4.0
       Description: "Sample Glue Job for Glue Runner Test"
       Role: !GetAtt GlueIAMRole.Arn
       Command:
         Name: glueetl
         PythonVersion: 3
-        ScriptLocation: !Sub "s3://${EMRServerlessRole}/glue_scripts/glue_sample.py"
+        ScriptLocation: !Sub "s3://${EMRServerlessS3Bucket}/glue_scripts/sample_2_workers.py"
       DefaultArguments:
         "--enable-metrics": "true" 
         "--enable-job-insights": "true"
         "--enable-observability-metrics" : "true"
         "--enable-spark-ui": "true"
-        "--spark-event-logs-path": !Sub "s3://${EMRServerlessRole}/glue-spark-event-logs/"        
+        "--spark-event-logs-path": !Sub "s3://${EMRServerlessS3Bucket}/glue-spark-event-logs/"        
       #   "--enable-auto-scaling": "true" # when we use auto-scaling - 1 
       # MaxCapacity: 2 # when we use auto-scaling - 2
       NumberOfWorkers: 2  # when we DON't use auto-scaling - 1
       WorkerType: G.1X # when we DON't use auto-scaling - 2            
+
+  SampleGlueJob8workers:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: gluej-runner-8-workers
+      GlueVersion: 4.0
+      Description: "Sample Glue Job for Glue Runner Test"
+      Role: !GetAtt GlueIAMRole.Arn
+      Command:
+        Name: glueetl
+        PythonVersion: 3
+        ScriptLocation: !Sub "s3://${EMRServerlessS3Bucket}/glue_scripts/sample_8_workers.py"
+      DefaultArguments:
+        "--enable-metrics": "true" 
+        "--enable-job-insights": "true"
+        "--enable-observability-metrics" : "true"
+        "--enable-spark-ui": "true"
+        "--spark-event-logs-path": !Sub "s3://${EMRServerlessS3Bucket}/glue-spark-event-logs/"        
+      #   "--enable-auto-scaling": "true" # when we use auto-scaling - 1 
+      # MaxCapacity: 2 # when we use auto-scaling - 2
+      NumberOfWorkers: 8  # when we DON't use auto-scaling - 1
+      WorkerType: G.1X # when we DON't use auto-scaling - 2          
+
+  SampleGlueJobAutoScale:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: gluej-runner-auto-scale
+      GlueVersion: 4.0
+      Description: "Sample Glue Job for Glue Runner Test"
+      Role: !GetAtt GlueIAMRole.Arn
+      Command:
+        Name: glueetl
+        PythonVersion: 3
+        ScriptLocation: !Sub "s3://${EMRServerlessS3Bucket}/glue_scripts/sample_auto_scale.py"
+      DefaultArguments:
+        "--enable-metrics": "true" 
+        "--enable-job-insights": "true"
+        "--enable-observability-metrics" : "true"
+        "--enable-spark-ui": "true"
+        "--spark-event-logs-path": !Sub "s3://${EMRServerlessS3Bucket}/glue-spark-event-logs/"        
+        "--enable-auto-scaling": "true" 
+      MaxCapacity: 10      
 
 Outputs:
   EMRServerlessApplicationId:
