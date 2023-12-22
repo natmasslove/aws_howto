@@ -1,0 +1,19 @@
+[
+    {
+        "type" : "emr_serverless",
+        "run_name": "emrs_convert_1month_1_executor",
+        "script_name": "emrserverless_scripts/convert_1month.py",
+        "arguments": [
+            "{s3_bucket}",
+            "nyc_rides_2022_csv/yellow_tripdata_2022-01.csv",
+            "output/emrs_convert_1month/auto/"
+        ],
+        "sparkSubmitParameters": {
+            "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory",
+            "spark.executor.instances" : "1",
+            "spark.dynamicAllocation.initialExecutors" : "1",
+            "spark.dynamicAllocation.maxExecutors" : "1"
+        }
+    }
+ 
+]

@@ -93,15 +93,21 @@ def watch_job_run(emr_client, application_id, run_id, logger):
     billedResourceUtilization = response["jobRun"].get("billedResourceUtilization",{})
     totalExecutionDurationSeconds = response["jobRun"]["totalExecutionDurationSeconds"]
 
+    dashboard_url = get_dashboard_for_job_run(emr_client, application_id, run_id)
+
     output = {
         "state_durations" : state_durations,
         "totalResourceUtilization" : totalResourceUtilization,
         "billedResourceUtilization" : billedResourceUtilization,
         "totalExecutionDurationSeconds" : totalExecutionDurationSeconds,
+        "dashboard_url" : dashboard_url,
     }
 
     return output
 
+def get_dashboard_for_job_run(emr_client, application_id, run_id):
+    response = emr_client.get_dashboard_for_job_run(applicationId=application_id, jobRunId=run_id)
+    return response["url"]
 
 def run_test(emr_client,
     application_id,
