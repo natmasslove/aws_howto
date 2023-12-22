@@ -95,17 +95,17 @@ Resources:
       NumberOfWorkers: 2  # when we DON't use auto-scaling - 1
       WorkerType: G.1X # when we DON't use auto-scaling - 2            
 
-  SampleGlueJob8workers:
+  SampleGlueJob6workers:
     Type: AWS::Glue::Job
     Properties:
-      Name: gluej-runner-8-workers
+      Name: gluej-runner-6-workers
       GlueVersion: 4.0
       Description: "Sample Glue Job for Glue Runner Test"
       Role: !GetAtt GlueIAMRole.Arn
       Command:
         Name: glueetl
         PythonVersion: 3
-        ScriptLocation: !Sub "s3://${EMRServerlessS3Bucket}/glue_scripts/sample_8_workers.py"
+        ScriptLocation: !Sub "s3://${EMRServerlessS3Bucket}/glue_scripts/sample_6_workers.py"
       DefaultArguments:
         "--enable-metrics": "true" 
         "--enable-job-insights": "true"
@@ -114,7 +114,7 @@ Resources:
         "--spark-event-logs-path": !Sub "s3://${EMRServerlessS3Bucket}/glue-spark-event-logs/"        
       #   "--enable-auto-scaling": "true" # when we use auto-scaling - 1 
       # MaxCapacity: 2 # when we use auto-scaling - 2
-      NumberOfWorkers: 8  # when we DON't use auto-scaling - 1
+      NumberOfWorkers: 6  # when we DON't use auto-scaling - 1
       WorkerType: G.1X # when we DON't use auto-scaling - 2          
 
   SampleGlueJobAutoScale:

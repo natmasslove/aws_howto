@@ -12,13 +12,13 @@
     },
     {
         "type" : "glue",
-        "run_name": "glue_convert_1month_8workers",
+        "run_name": "glue_convert_1month_6workers",
         "script_name": "glue_scripts/convert_1month.py",
-        "job_name" : "gluej-runner-8-workers",
+        "job_name" : "gluej-runner-6-workers",
         "arguments" : {
             "--s3_bucket_name" : "{s3_bucket}",
             "--input_path" : "nyc_rides_2022_csv/yellow_tripdata_2022-01.csv",
-            "--output_path" : "output/glue_convert_1month/8w/"
+            "--output_path" : "output/glue_convert_1month/6w/"
         }
     },  
     {

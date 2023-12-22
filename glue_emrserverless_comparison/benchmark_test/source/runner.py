@@ -3,13 +3,15 @@ import json
 import argparse
 import boto3
 
-from helpers.common import get_logger
+import helpers.common as common
 from helpers.cloudformation import get_stack_outputs
 from helpers.emr_serverless import run_test as emr_serverless_run_test
 from helpers.glue import run_test as glue_run_test
 
 STACK_NAME = "cf-glue-vs-emr-serverless"
 SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+
+logger = common.get_logger()
 
 emr_client = boto3.client("emr-serverless")
 glue_client = boto3.client("glue")
@@ -51,7 +53,7 @@ for test_item in test_items:
         arguments = test_item["arguments"]
         sparkSubmitParameters = test_item["sparkSubmitParameters"]
         run_name = test_item["run_name"]
-        logger = get_logger(log_name=run_name)
+        common.logger_add_file_handler(logger, run_name)
         logger.info(f"Processing test item: {json.dumps(test_item, indent=4, default=str)}")
 
         kwargs = {
@@ -78,13 +80,14 @@ for test_item in test_items:
         # }        
 
         emr_serverless_run_test(**kwargs)
+        common.logger_remove_file_handler(logger, run_name)
 
     elif item_type == "glue":        
         script_name = test_item["script_name"]
         local_script_fullpath = os.path.join(SCRIPT_FOLDER, script_name)
         arguments = test_item.get("arguments",{})
         run_name = test_item["run_name"]
-        logger = get_logger(log_name=run_name)
+        common.logger_add_file_handler(logger, run_name)
         logger.info(f"Processing test item: {json.dumps(test_item, indent=4, default=str)}")
         kwargs = {
             "glue_client" : glue_client,
@@ -95,6 +98,8 @@ for test_item in test_items:
         }
 
         glue_run_test(**kwargs)
+        common.logger_remove_file_handler(logger, run_name)
+        
     else:
         raise Exception(f"Unknown test item type: {item_type}")
 
