@@ -21,8 +21,8 @@ outputs = get_stack_outputs(STACK_NAME)
 
 s3_bucket = outputs["BenchmarkTestS3Bucket"]
 # EMR
-application_id = outputs["EMRServerlessApplicationId"]
-execution_role_arn = outputs["EMRServerlessRoleArn"]
+emrs_application_id = outputs["EMRServerlessApplicationId"]
+emrs_execution_role_arn = outputs["EMRServerlessRoleArn"]
 # Glue
 
 #################################################################
@@ -46,62 +46,66 @@ print(f"Test items: {test_items}")
 # for each test item, run the test
 for test_item in test_items:    
     item_type = test_item["type"]
-    if item_type == "emr_serverless":
-        # EMR Flow
-        script_name = test_item["script_name"]
-        local_script_fullpath = os.path.join(SCRIPT_FOLDER, script_name)
-        arguments = test_item["arguments"]
-        sparkSubmitParameters = test_item["sparkSubmitParameters"]
-        run_name = test_item["run_name"]
-        common.logger_add_file_handler(logger, run_name)
-        logger.info(f"Processing test item: {json.dumps(test_item, indent=4, default=str)}")
+    repeat = int(test_item.get("repeat", "1"))
+    for i in range(repeat):
+        print(f"Run #{i+1} out of {repeat}")
 
-        kwargs = {
-            "emr_client": emr_client,
-            "application_id": application_id,
-            "execution_role_arn": execution_role_arn,
-            "logger": logger,
-            "run_name": run_name,
-            "local_script_fullpath": local_script_fullpath,
-            "s3_bucket": s3_bucket,
-            "s3_script_path": script_name,
-            "arguments": arguments,
-            "sparkSubmitParameters": sparkSubmitParameters,
-        }
-        # this is optional - just to demonstrate how you can change compute capacity allocation for the job run
-        # you also can leave it empty sparkSubmitParameters = {}
-        # sparkSubmitParameters = {
-        #     "spark.hadoop.hive.metastore.client.factory.class" : "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory",
-        #     "spark.executor.instances" : "1",
-        #     "spark.dynamicAllocation.initialExecutors" : "1",
-        #     "spark.dynamicAllocation.maxExecutors" : "1",
-        #     "spark.executor.cores" : "2",
-        #     "spark.executor.memory" : "8G",
-        # }        
+        if item_type == "emr_serverless":
+            # EMR Flow
+            script_name = test_item["script_name"]
+            local_script_fullpath = os.path.join(SCRIPT_FOLDER, script_name)
+            arguments = test_item["arguments"]
+            sparkSubmitParameters = test_item["sparkSubmitParameters"]
+            run_name = test_item["run_name"]
+            common.logger_add_file_handler(logger, run_name)
+            logger.info(f"Processing test item: {json.dumps(test_item, indent=4, default=str)}")
 
-        emr_serverless_run_test(**kwargs)
-        common.logger_remove_file_handler(logger, run_name)
+            kwargs = {
+                "emr_client": emr_client,
+                "application_id": emrs_application_id,
+                "execution_role_arn": emrs_execution_role_arn,
+                "logger": logger,
+                "run_name": run_name,
+                "local_script_fullpath": local_script_fullpath,
+                "s3_bucket": s3_bucket,
+                "s3_script_path": script_name,
+                "arguments": arguments,
+                "sparkSubmitParameters": sparkSubmitParameters,
+            }
+            # this is optional - just to demonstrate how you can change compute capacity allocation for the job run
+            # you also can leave it empty sparkSubmitParameters = {}
+            # sparkSubmitParameters = {
+            #     "spark.hadoop.hive.metastore.client.factory.class" : "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory",
+            #     "spark.executor.instances" : "1",
+            #     "spark.dynamicAllocation.initialExecutors" : "1",
+            #     "spark.dynamicAllocation.maxExecutors" : "1",
+            #     "spark.executor.cores" : "2",
+            #     "spark.executor.memory" : "8G",
+            # }        
 
-    elif item_type == "glue":        
-        script_name = test_item["script_name"]
-        local_script_fullpath = os.path.join(SCRIPT_FOLDER, script_name)
-        arguments = test_item.get("arguments",{})
-        run_name = test_item["run_name"]
-        common.logger_add_file_handler(logger, run_name)
-        logger.info(f"Processing test item: {json.dumps(test_item, indent=4, default=str)}")
-        kwargs = {
-            "glue_client" : glue_client,
-            "local_script_fullpath" : local_script_fullpath,
-            "job_name" : test_item["job_name"],
-            "arguments": arguments,
-            "logger": logger,
-        }
+            emr_serverless_run_test(**kwargs)
+            common.logger_remove_file_handler(logger, run_name)
 
-        glue_run_test(**kwargs)
-        common.logger_remove_file_handler(logger, run_name)
-        
-    else:
-        raise Exception(f"Unknown test item type: {item_type}")
+        elif item_type == "glue":        
+            script_name = test_item["script_name"]
+            local_script_fullpath = os.path.join(SCRIPT_FOLDER, script_name)
+            arguments = test_item.get("arguments",{})
+            run_name = test_item["run_name"]
+            common.logger_add_file_handler(logger, run_name)
+            logger.info(f"Processing test item: {json.dumps(test_item, indent=4, default=str)}")
+            kwargs = {
+                "glue_client" : glue_client,
+                "local_script_fullpath" : local_script_fullpath,
+                "job_name" : test_item["job_name"],
+                "arguments": arguments,
+                "logger": logger,
+            }
+
+            glue_run_test(**kwargs)
+            common.logger_remove_file_handler(logger, run_name)
+            
+        else:
+            raise Exception(f"Unknown test item type: {item_type}")
 
 
 

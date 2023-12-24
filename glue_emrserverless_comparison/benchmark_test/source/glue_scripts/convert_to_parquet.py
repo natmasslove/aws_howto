@@ -4,13 +4,14 @@ from pyspark.sql import SparkSession
 from awsglue.context import GlueContext
 from awsglue.utils import getResolvedOptions
 
-print('Converts csv -> pq data. Only for 1 csv file')
+print('Converts csv -> pq data.')
 
 # Fetching arguments
 args = getResolvedOptions(sys.argv, ['s3_bucket_name','input_path','output_path'])
 s3_bucket_name = args['s3_bucket_name']
 input_path = args['input_path']
 output_path = args['output_path']
+print(f'Using s3 bucket name {s3_bucket_name}\n Reading from {input_path}\n Writing to {output_path}\n')
 
 # Initializing Spark and Glue contexts
 sc = SparkContext()

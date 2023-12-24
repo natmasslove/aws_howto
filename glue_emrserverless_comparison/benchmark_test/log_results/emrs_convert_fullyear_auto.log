@@ -1,0 +1,312 @@
+Processing test item: {
+    "type": "emr_serverless",
+    "run_name": "emrs_convert_fullyear_auto",
+    "script_name": "emrserverless_scripts/convert_to_parquet.py",
+    "arguments": [
+        "s3-glue-vs-emr-serverless-405389362913",
+        "nyc_rides_2022_csv/",
+        "output/emrs_convert_fullyear/auto/"
+    ],
+    "sparkSubmitParameters": {
+        "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
+    }
+}
+Running script emrserverless_scripts/convert_to_parquet.py, using arguments: [s3-glue-vs-emr-serverless-405389362913, nyc_rides_2022_csv/, output/emrs_convert_fullyear/auto/]
+Job Run started. Job Run ID: 00ffod74rctgc016
+{'ResponseMetadata': {'RequestId': '5fd457d4-6dda-4ae6-ba07-3d7577bc7331', 'HTTPStatusCode': 200, 'HTTPHeaders': {'date': 'Sun, 24 Dec 2023 14:33:20 GMT', 'content-type': 'application/json', 'content-length': '179', 'connection': 'keep-alive', 'x-amzn-requestid': '5fd457d4-6dda-4ae6-ba07-3d7577bc7331', 'x-amzn-remapped-x-amzn-requestid': 'Qc8flFgbFiAEdag=', 'x-amzn-remapped-content-length': '179', 'x-amzn-remapped-connection': 'keep-alive', 'x-amz-apigw-id': 'Qc8flFgbFiAEdag=', 'x-amzn-trace-id': 'Root=1-65884130-24be8e2b6515a1c06813f431', 'x-amzn-remapped-date': 'Sun, 24 Dec 2023 14:33:20 GMT'}, 'RetryAttempts': 0}, 'applicationId': '00ffm02uu358ji15', 'jobRunId': '00ffod74rctgc016', 'arn': 'arn:aws:emr-serverless:eu-central-1:405389362913:/applications/00ffm02uu358ji15/jobruns/00ffod74rctgc016'}
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+State SCHEDULED: 43.024802 seconds
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+State RUNNING: 97.623287 seconds
+SUCCESS
+Waiting for totalResourceUtilization to be populated.
+Waiting for totalResourceUtilization to be populated.
+Waiting for totalResourceUtilization to be populated.
+Total Running Time: 150.2516 seconds
+Output:
+{
+    "state_durations": {
+        "SCHEDULED": 43.024802,
+        "RUNNING": 97.623287,
+        "SUCCESS": 2.002414
+    },
+    "totalResourceUtilization": {
+        "vCPUHour": 0.621,
+        "memoryGBHour": 2.484,
+        "storageGBHour": 3.106
+    },
+    "billedResourceUtilization": {},
+    "totalExecutionDurationSeconds": 96,
+    "dashboard_url": "https://j-00ffod74rctgc016.dashboard.emr-serverless.eu-central-1.amazonaws.com/?authToken=eDAx8cPIXE1fVquBMdA6YxRuWDn5xGJ47Gw2fIXsL5AGGYXVeiwNKUav9ose6vs3hQQ9-oEs7dtRZ1sExg7swU0lKXTp24CTlHoR6x477UwcfI--ZXNBTLtMXYg441QlTg6o57vn6FBzMqvKrSp5nrSZ3SmsgkMnnKPdVpgv4osRhzdr2cgyZkunef5TQUtbOkBhj12J4PvzM7nngQ4lgvbb-hOuWfp0_k-xyYarg-A020vso_eR4_2jlrvftJALQZ5Ftvx7xue3idbOywoAdiTMjGVlDqg0QBYuU-eZ-Em8savxzUGdlRMnhRL5bVUzItY4v0DK0eJuMBm1V4tuVsQHEUx4C5eu5A7LuMb3HxXiZYHnyxqucSW4oZcjIYpwB9VWH3kMIi0YfQy3hoTEHKgUwgTP-y-xDzITbQtuvfTE9ILzlFu54IDfZnX-wpYrrn8dMb05bORachBBYglcp7F0vog8m8fskRfJTkT5dG8z0dsZEEBY0R4Lf-4Vfk9dHqjhKUvl07fyACnmd5LT_gAL8s1Pj-NaMX-BbauAE-Xg1G7uvKJo-d7jfVvgpPSLU8aCumr2PeJNdoMktQEeT-tqZympnuywHOpLf1iQ7Xmq_0aIko9FL0Xllw1SvJMq_j_tXK98_bjdc0F2laXCpIAdFowCNdfjGoEjDuDY3jJpnmRmJ4TlheXOOT9wBYcxXQPKyWrQwD84JZ9dMeqhaalt4Kr6S7k-tKesBJ9wIZo32LvASQEunNJVADVccqniUCcTke30cE7L1QpGIsAPOG4bat7_JtA5v2hvLQMM4DQ6AoOwEXQJih1Z67EPs3YWPF7U3CdxUbnVHyTjKHJgWyzH8alwftI62vQZ7jez2l0HovqK8q0e1rAWZrBoIZdtc1KRbWSsFSxG9i21HHawDDevcDpqiw3QDId5ajts8ShAZo-1MS-NMMwl499J3ptBqu97K-At8Jn1YMEVCCU49hFiP9u38wio64WqPQOLT-c8ZZ4.eyJraWQiOiJBUUlCQUhoU0I5bGRCekFEOE5JV3BFcC81RExoZUhJcHdFRmtWOUVUQmNuTlM1OTlXQUhqa1ptcW9CaFZSMWQ0VXBFMVhrT0ZBQUFBb2pDQm53WUpLb1pJaHZjTkFRY0dvSUdSTUlHT0FnRUFNSUdJQmdrcWhraUc5dzBCQndFd0hnWUpZSVpJQVdVREJBRXVNQkVFREpmM2N2TVFOVU5XclZQKzB3SUJFSUJiY1g0YlVzK3RIdDZrOXJKbTIycjk0S0Nhc1dBTlordWxxS3pFeTVJMTQ3OUdoZWdJTXErRmp5Ukdxbk9FV3hoejl2RklReU5qVGE3WHVXZHUvY09hYnFqcUoyb3lKeFJnSEpuRUR5UVNiOW5QQjlOZ0huOG9oUDh0ZFE9PSJ9"
+}
+Processing test item: {
+    "type": "emr_serverless",
+    "run_name": "emrs_convert_fullyear_auto",
+    "script_name": "emrserverless_scripts/convert_to_parquet.py",
+    "arguments": [
+        "s3-glue-vs-emr-serverless-405389362913",
+        "nyc_rides_2022_csv/",
+        "output/emrs_convert_fullyear/auto/"
+    ],
+    "sparkSubmitParameters": {
+        "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
+    }
+}
+Running script emrserverless_scripts/convert_to_parquet.py, using arguments: [s3-glue-vs-emr-serverless-405389362913, nyc_rides_2022_csv/, output/emrs_convert_fullyear/auto/]
+Job Run started. Job Run ID: 00ffodn1tguc5o16
+{'ResponseMetadata': {'RequestId': '7c90b6fe-3704-4e03-acf8-d041b314b008', 'HTTPStatusCode': 200, 'HTTPHeaders': {'date': 'Sun, 24 Dec 2023 15:01:08 GMT', 'content-type': 'application/json', 'content-length': '179', 'connection': 'keep-alive', 'x-amzn-requestid': '7c90b6fe-3704-4e03-acf8-d041b314b008', 'x-amzn-remapped-x-amzn-requestid': 'QdAkOHmjliAEdcQ=', 'x-amzn-remapped-content-length': '179', 'x-amzn-remapped-connection': 'keep-alive', 'x-amz-apigw-id': 'QdAkOHmjliAEdcQ=', 'x-amzn-trace-id': 'Root=1-658847b4-65bf8ee63627e96836961df4', 'x-amzn-remapped-date': 'Sun, 24 Dec 2023 15:01:08 GMT'}, 'RetryAttempts': 0}, 'applicationId': '00ffm02uu358ji15', 'jobRunId': '00ffodn1tguc5o16', 'arn': 'arn:aws:emr-serverless:eu-central-1:405389362913:/applications/00ffm02uu358ji15/jobruns/00ffodn1tguc5o16'}
+PENDING
+State PENDING: 2.116088 seconds
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+State SCHEDULED: 38.678341 seconds
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+State RUNNING: 96.185276 seconds
+SUCCESS
+Waiting for totalResourceUtilization to be populated.
+Waiting for totalResourceUtilization to be populated.
+Waiting for totalResourceUtilization to be populated.
+Total Running Time: 146.0463 seconds
+Output:
+{
+    "state_durations": {
+        "PENDING": 2.116088,
+        "SCHEDULED": 38.678341,
+        "RUNNING": 96.185276,
+        "SUCCESS": 2.001671
+    },
+    "totalResourceUtilization": {
+        "vCPUHour": 0.629,
+        "memoryGBHour": 2.516,
+        "storageGBHour": 3.144
+    },
+    "billedResourceUtilization": {},
+    "totalExecutionDurationSeconds": 96,
+    "dashboard_url": "https://j-00ffodn1tguc5o16.dashboard.emr-serverless.eu-central-1.amazonaws.com/?authToken=eDAxswXo8Htn7_LSyPPzugry0Z2sxqh7XeQOTpWLLQ-5pOuB_G7M0NSUmO_pmrHfJBQ4MhZwL_xMHaJksFlITqIhJluEyG3pIjOx7VcUM4meQc98fh0ClsQQiV7pjfLoXASXyGx2g0guRWLHpq9ey09YDEdYiPC7-CtaL8mkzGOTezY9PJYIcDE7GDYYMfLslroyAg7c5wUWEixysUrZUENcMvjPE03VmweTv-qzOe_rlP1wFBWDGlL9sW___CefFskgz_CBpX2u5nqxZ2v6WmxQggaaEXC8eYV60W5sTHNd0xqA0YvZFEe6oX99AMjudZ67y4O9tH24MgfMdlDOZaGch8p6kbQ4O0eXUXoRTnrZ5w_gBBqHKIdwOV42g1GEenzTIOky4DA4cMtIBZKzrxmY7if2C-Bu6P-wvHJ3oMfGo-UlmebeHfTxOwkQOz6pjPpKr18CFf1cu4VJEBnOxBrbovQYsK8Pk-pG3BV2f_ABC9Qgm7w4IFp1PBLLsLfkkCfgIIRHjYqH-oFT7xbzELSQlsENdM2jOltUWs_YJNjZbhc6tgHJH3chREw1utMl9dh7j905-GCvCSGdTcXuiJRun5nJIAum9BymqKsReLENEiAlw96SDjhr3riJJAejoRn5JtDP46L4jAi6mpXPL4WOGq6pGm7EOCozq4xvzNwh_pmk-RT3mJatxjHE55ZNH7Aoy0IgAv5_LCgv1o-IRE9MLhUmZc9VVVCUUrsYHs4UTd7gohlgpEd_2N9lRCZItiKRGrvp3VxWVGEbVIMV4V4jhUrsdC7Nu0qBPMHND2MwldzeqWSR4NsT0rbE60yOm9V47aYUhnjunt8iEBKcMx2wLOdtUShe0FbD6AqG733yHyXMGR47uM9papx8l9x5uGoctsK6-RXTjyor5pzQ5MWYdwPclEr4QUgEwS4CXeXMUMj1HAAAYnHhW0uNqXh3Z_ANENLoCwWbAkHV8nh0wpZS87bIU5Xwhm4zx9gJxNvW.eyJraWQiOiJBUUlCQUhoU0I5bGRCekFEOE5JV3BFcC81RExoZUhJcHdFRmtWOUVUQmNuTlM1OTlXQUh1R1I0M0JQUVhRR0toYXJVaDl6M1pBQUFBb2pDQm53WUpLb1pJaHZjTkFRY0dvSUdSTUlHT0FnRUFNSUdJQmdrcWhraUc5dzBCQndFd0hnWUpZSVpJQVdVREJBRXVNQkVFREp2S0ZVRUFPektvWnpLaXpnSUJFSUJiWlEwUlRTTXRYcXhCK2hGUWpkYjFURDAwM2lQNE5lS2YrY3NURGpVK2pUR29JMUFIZUtycTZhL0RmRlJXWStyM1VtVVpvOC9ZSHF6eDVYcllxZTVEeG1oRzFWRmxHQmV2a0xMSjh3MkFLc2RqU1Y2Y09wQjY2NTdhR2c9PSJ9"
+}
+Processing test item: {
+    "type": "emr_serverless",
+    "run_name": "emrs_convert_fullyear_auto",
+    "script_name": "emrserverless_scripts/convert_to_parquet.py",
+    "arguments": [
+        "s3-glue-vs-emr-serverless-405389362913",
+        "nyc_rides_2022_csv/",
+        "output/emrs_convert_fullyear/auto/"
+    ],
+    "sparkSubmitParameters": {
+        "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
+    }
+}
+Running script emrserverless_scripts/convert_to_parquet.py, using arguments: [s3-glue-vs-emr-serverless-405389362913, nyc_rides_2022_csv/, output/emrs_convert_fullyear/auto/]
+Job Run started. Job Run ID: 00ffoevdjasfj016
+{'ResponseMetadata': {'RequestId': '6e3d575e-23c1-4df4-8e96-5b8ebe762ab1', 'HTTPStatusCode': 200, 'HTTPHeaders': {'date': 'Sun, 24 Dec 2023 16:11:40 GMT', 'content-type': 'application/json', 'content-length': '179', 'connection': 'keep-alive', 'x-amzn-requestid': '6e3d575e-23c1-4df4-8e96-5b8ebe762ab1', 'x-amzn-remapped-x-amzn-requestid': 'QdK5jG4NFiAEScQ=', 'x-amzn-remapped-content-length': '179', 'x-amzn-remapped-connection': 'keep-alive', 'x-amz-apigw-id': 'QdK5jG4NFiAEScQ=', 'x-amzn-trace-id': 'Root=1-6588583c-580b6ab2473053207c4a8b9c', 'x-amzn-remapped-date': 'Sun, 24 Dec 2023 16:11:40 GMT'}, 'RetryAttempts': 0}, 'applicationId': '00ffm02uu358ji15', 'jobRunId': '00ffoevdjasfj016', 'arn': 'arn:aws:emr-serverless:eu-central-1:405389362913:/applications/00ffm02uu358ji15/jobruns/00ffoevdjasfj016'}
+PENDING
+State PENDING: 2.126442 seconds
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+SCHEDULED
+State SCHEDULED: 40.496002 seconds
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+State RUNNING: 96.973826 seconds
+SUCCESS
+Waiting for totalResourceUtilization to be populated.
+Waiting for totalResourceUtilization to be populated.
+Waiting for totalResourceUtilization to be populated.
+Total Running Time: 149.2539 seconds
+Output:
+{
+    "state_durations": {
+        "PENDING": 2.126442,
+        "SCHEDULED": 40.496002,
+        "RUNNING": 96.973826,
+        "SUCCESS": 2.002626
+    },
+    "totalResourceUtilization": {
+        "vCPUHour": 0.623,
+        "memoryGBHour": 2.493,
+        "storageGBHour": 3.117
+    },
+    "billedResourceUtilization": {},
+    "totalExecutionDurationSeconds": 98,
+    "dashboard_url": "https://j-00ffoevdjasfj016.dashboard.emr-serverless.eu-central-1.amazonaws.com/?authToken=eDAxVECunaUuDPngIkWPl_vtEqTg5-4QPTHdJFvemfvYNhlbPBUWSyf7KFcuhaUuIlYd-ZNxePkhJGQ6hNmyZpfwCFQRvAlhoU9T62de_ata16h-5lXBGUS_9Q39U4g1NMP9Um78y_P19GUiDB0SAEg8S-VZT6QKLYZfh_0BypB9WCItHv0azKql7ZhC3s9dy9TUx6aoRLt0IgWdrqh_lhf4FJS8OEb1NBewx5gXsYDvdu4qjmYeNpo2egaf4LwcipKQFgxK1NppHOMA7mKrxHvsHzTO7eSce7NQYJPUxL90e7CC2Sy3GUDoD_8ECLlEH3-xb_RKS8OwVTk9apxYnJfe9z7tMvbaDatq1OcN28qfJBfZseGHV2D95vNu4HuGDxvmFqZSg-pa4k0xgKQwaZZOb29OyzfyO0cPQt3-CoMkVGiUpy8MQ3FlZobux05CXqQDYlRaGAihbd5485nssQi3QgXWquHtknytbDNN5vMKTuxiABb8e8EV28NDGEhkEDvRQ6ADva6ocaFkForTBxAP11PuaY9QaYTTcdo-6V6m59sIAtcJLKbkozQslVozuHEj4ttmoZnIoOmgzhxQBZNna63w1IWL4UFXauB07zvckMx8J8T6BpISolZiaVeOhV0GEj3835kITzEHiOwbOyGGXw0LsRuN9XEbvU-iXq-BIezoPOlMA2r5pWczEAY09pCAifQ1F68oAi2NKR2Vn87SmTWrR80nSVUqXeoxZzYg_oPo6774A3efqHrUaNolpJGHEOAH3luXdYuFVliL0YGdKGkE3t4uBxs1HvxaSf2Fe_gDRs1R_lGAPLEoWn35CkS4Y2X2T_XkgtnH2CrsbHnzOE3eCfmUwy21cps78UJszZ5NUrdWAWqW5syBHcp2Pjs0VfIG_OLRTgoQRFeXjO2FIeqiDF6onXY-P_znQDQ4oDLu0RySK640md7nNNIIho0OQfGzFgmYJR4_RQAC7htRRWhR1f4kAc9YNfz7bDWshdk.eyJraWQiOiJBUUlCQUhoU0I5bGRCekFEOE5JV3BFcC81RExoZUhJcHdFRmtWOUVUQmNuTlM1OTlXQUVBYk9wUGg5SnB5ckxIL1JHV3JCUXZBQUFBb2pDQm53WUpLb1pJaHZjTkFRY0dvSUdSTUlHT0FnRUFNSUdJQmdrcWhraUc5dzBCQndFd0hnWUpZSVpJQVdVREJBRXVNQkVFRE1yVnRZUEVqOHBJT3Y4S2JBSUJFSUJiM05MQ1JWTUE3c2JpYXQrV1dEMzRkK2FLR2JQOWpQVzNUcU1Qa3Q3Q0RCVmhIazRmUVZQQUc3cFVobDlwQjA1eHVFTCthMDhseCtUL2YzcHFxOUxnUUNsVzllVXhyRWtSalVtUG1JdjN6bEx0SXRIWDFRZHJEVFBaeHc9PSJ9"
+}

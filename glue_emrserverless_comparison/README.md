@@ -6,6 +6,12 @@
 AWS provides a wide set of serverless technologies.
 Glue & EMR - for big data processing (specifically EMR serverless, as we are talking serverless)
 
+<<This article's intent is to provide your information for choosing between ....
+
+<<First we cover some functionality aspects which might affect your choice
+<<Then, we provide the results of benchmark test we conducted to assess their cost and performance 
+
+
 
 ## Compatibility
 

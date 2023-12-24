@@ -1,6 +1,7 @@
 [
     {
         "type" : "glue",
+        "repeat": 3,
         "run_name": "glue_sample_2workers",
         "script_name": "glue_scripts/glue_sample.py",
         "job_name" : "gluej-runner-2-workers",
