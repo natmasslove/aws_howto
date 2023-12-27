@@ -1,5 +1,4 @@
 
-
 1. Deploy all resources:
 
 ```
