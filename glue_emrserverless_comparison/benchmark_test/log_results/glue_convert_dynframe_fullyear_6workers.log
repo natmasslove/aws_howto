@@ -1,0 +1,173 @@
+Processing test item: {
+    "type": "glue",
+    "run_name": "glue_convert_dynframe_fullyear_6workers",
+    "script_name": "glue_scripts/convert_to_parquet_dynframe.py",
+    "job_name": "gluej-runner-6-workers",
+    "arguments": {
+        "--s3_bucket_name": "s3-glue-vs-emr-serverless-405389362913",
+        "--input_path": "nyc_rides_2022_csv/",
+        "--output_path": "output/glue_convert_dynframe_fullyear/6w/"
+    }
+}
+Job Run started. Job Run ID: jr_24fe0b32936d46510adda0c4e79e2159539a8bacc03c25c5f792a0b51a1d3a62
+{'JobRunId': 'jr_24fe0b32936d46510adda0c4e79e2159539a8bacc03c25c5f792a0b51a1d3a62', 'ResponseMetadata': {'RequestId': 'a594f864-6ce8-46aa-a49e-fae1806f7a45', 'HTTPStatusCode': 200, 'HTTPHeaders': {'date': 'Sun, 24 Dec 2023 17:07:07 GMT', 'content-type': 'application/x-amz-json-1.1', 'content-length': '82', 'connection': 'keep-alive', 'x-amzn-requestid': 'a594f864-6ce8-46aa-a49e-fae1806f7a45'}, 'RetryAttempts': 0}}
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+RUNNING
+State RUNNING: 234.145768 seconds
+SUCCEEDED
+Total Running Time: 236.9413 seconds
+Output:
+{
+    "state_durations": {
+        "RUNNING": 234.145768,
+        "SUCCEEDED": 2.001884
+    },
+    "execution_time_sec": 224,
+    "allocated_capacity": 6,
+    "dpu_seconds": null,
+    "dpu_hours": 0.373,
+    "response": {
+        "JobRun": {
+            "Id": "jr_24fe0b32936d46510adda0c4e79e2159539a8bacc03c25c5f792a0b51a1d3a62",
+            "Attempt": 0,
+            "JobName": "gluej-runner-6-workers",
+            "StartedOn": "2023-12-24 20:07:07.474000+03:00",
+            "LastModifiedOn": "2023-12-24 20:11:01.716000+03:00",
+            "CompletedOn": "2023-12-24 20:11:01.716000+03:00",
+            "JobRunState": "SUCCEEDED",
+            "Arguments": {
+                "--input_path": "nyc_rides_2022_csv/",
+                "--s3_bucket_name": "s3-glue-vs-emr-serverless-405389362913",
+                "--output_path": "output/glue_convert_dynframe_fullyear/6w/"
+            },
+            "PredecessorRuns": [],
+            "AllocatedCapacity": 6,
+            "ExecutionTime": 224,
+            "Timeout": 2880,
+            "MaxCapacity": 6.0,
+            "WorkerType": "G.1X",
+            "NumberOfWorkers": 6,
+            "LogGroupName": "/aws-glue/jobs",
+            "GlueVersion": "4.0"
+        },
+        "ResponseMetadata": {
+            "RequestId": "0569cc3a-8adb-47c1-b535-9ce6d10a78d0",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "date": "Sun, 24 Dec 2023 17:11:01 GMT",
+                "content-type": "application/x-amz-json-1.1",
+                "content-length": "1012",
+                "connection": "keep-alive",
+                "x-amzn-requestid": "0569cc3a-8adb-47c1-b535-9ce6d10a78d0"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}
