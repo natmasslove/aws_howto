@@ -150,23 +150,50 @@ This, in our opinion, makes it easier to implement database integrations in AWS 
 
 2. Other common data stores
 
-In your data platform ... may need to .. SAP HANA, Snowflake
+There might be a requirement in your data platform to interact with third-party data stores. It might be SAP HANA, Snowflake,
+databases in Azure Cloud etc.
+AWS Glue provides out-of-the-box connectors for many data stores like these (and list is growing).
 
-Glue .. provides out-of-the-box ... 
-  same way - create connection
-  list is growing
+This saves your from hassle of picking correct JDBC driver, downloading it and integrating it into your job and, then, maintaining driver version etc. (which would be exactly EMR Serverless scenario for majority of data stores).
 
-Saves your from hassle of picking correct JDBC driver, downloading it and integrating it into your job and, then, maintaining driver version etc. Which would be exactly EMR Serverless scenario for majority of data stores.
-
-
-
+AWS Glue takes an upperhand here as well.
 
 ## Observability
 
-- In Glue - very good + latest additions
-    - Spark UI <<todo add screenshot>>
-    - Observability metrics <<todo add screenshot>>
-- In EMR - <<todo check>>
+AWS Glue got some nice additions lately, so it's fair to say that both services provide a very good set of capabilities to
+monitor job and investigate potentials bottlenecks/painpoints.
+
+**EMR Studio** provides Spark UI (for running jobs) and Spark History server (for completed ones) visualization for each job run you have.
+Alternatively, you can generate a job run's temporary URL for Spark UI dashboard using AWS SDK or CLI commands.
+
+![EMR Serverless Spark UI](img/emrs_spark_ui.png)
+
+**AWS Glue** also provides sufficient capabilities in that regard. Even better, there were several recent improvement adding
+observability metrics and Spark UI:
+
+![Glue Spark UI and metrics](img/glue_observability.png)
+
+### Service-Specific features
+
+AWS Glue provides several enhancements which might accelerate or ease the development process including:
+- Dynamic Data Frame which has some nice method for easier data reads/writes integrating with AWS Glue Connections and AWS Glue Data Catalog
+- Job bookmarks
+
+From development perspective having those additions might be considered as an advantage for AWS Glue Jobs.
+
+## Benchmark test
+
+The main purpose of this test was to compare services cost and performance. In other words, which one would be cheaper to
+process a portion of data and how the execution time compares.
+
+As a test workload we used a scenario where we take a S3-based csv dataset, perform data type conversion and save the data 
+into another S3 location. This could be considered as a simulation of one of the steps in batch processing (incremental load from raw to stage layer).
+
+For dataset we took NewYork taxi (yellow taxi) rides data for 2022, which is sized around 4Gb in csv format.
+This represents well the typical size of incremental data batch, which doesn't usually exceed several Gb.
+
+Source code for running the tests, execution logs and detailed results file you can find in [git repo](benchmark_test/README.md).
+
 
 ## Performance
 
@@ -183,27 +210,8 @@ Saves your from hassle of picking correct JDBC driver, downloading it and integr
 
 ## Cost
 
-
-
 - For smaller workloads EMR Serverless might be cheaper as you can start from 1 vCPU for super-small workload
 - Whereas in AWS Glue minimum number of workers is 2 (4 vCPU each) 
-
-## Technology maturity
-
-- EMR Serverless announced <<todo check>>
-- Glue started back in <<todo check>>
-
-- Both has a very good documentation
-
-
-
-##  Features (?) <<todo rephrase>>
-
-### Specific additions (?) <<todo rephrase>>
-
-- Glue provides Dynamic Data Frame which <<todo describe>>
-- Glue provides Job bookmarks
-
 
 
 
