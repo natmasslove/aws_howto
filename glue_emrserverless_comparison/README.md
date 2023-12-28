@@ -106,18 +106,59 @@ Defining State Machine task for Glue Job Run:
 You can run asynchronously or wait for job completion using ".sync".
 
 3. There's a native orchestration mechanism for Glue - Glue Workflows. Of course, it seamlessly integrates with Glue and not
-available for EMR serverless.
+available for EMR Serverless.
 But as this option is less advanced than Airflow or Step Function, we wouldn't consider having it as a big advantage for Glue.
 
 ### Integration: Databases and data providers
 
 1. AWS Databases: Redshift, RDS, Aurora
 
-in Glue - connections
-in EMR - JDBC
+Typical approach in **EMR Serverless** (as well as in just plain PySpark) would be using JDBC:
+```python
+from pyspark.sql import SparkSession
 
-2. Snowflake
-3. SAP HANA
+spark = SparkSession.builder.getOrCreate()
+
+df = (
+    spark.read.format("jdbc")
+    .option(
+        "url", "jdbc:postgresql://<host_name>:<port>/<db_name>"
+    )
+    .option("driver", "org.postgresql.Driver")
+    .option("user", "<username>")
+    .option("password", "<password>")
+    .load()
+)
+```
+And, of course, you will need to retrieve DB credentials first (most likely from Secrets Manager).
+
+In **AWS Glue** you can use built-in mechanism of Glue Connections, where you define connection properties alongside with
+credentials (best practice is to reference pre-created secret). Then you can just like this:
+
+```python
+dynamic_frame_read = glueContext.create_dynamic_frame.from_options(
+    connection_type="postgresql",
+    connection_options={
+        "connectionName": connection_name
+        "dbtable": table_name,
+        ...        
+    }
+)
+```
+
+This, in our opinion, makes it easier to implement database integrations in AWS Glue Jobs.
+
+2. Other common data stores
+
+In your data platform ... may need to .. SAP HANA, Snowflake
+
+Glue .. provides out-of-the-box ... 
+  same way - create connection
+  list is growing
+
+Saves your from hassle of picking correct JDBC driver, downloading it and integrating it into your job and, then, maintaining driver version etc. Which would be exactly EMR Serverless scenario for majority of data stores.
+
+
 
 
 ## Observability

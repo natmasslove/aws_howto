@@ -12,6 +12,8 @@ def get_logger():
 def logger_add_file_handler(logger, log_name):    
     file_name = f"log/{log_name}.log"
     file_handler = logging.FileHandler(file_name)
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    file_handler.setFormatter(formatter)    
     logger.addHandler(file_handler)
     print(f"Added file handler {file_name}")
    
