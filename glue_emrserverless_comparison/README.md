@@ -193,27 +193,35 @@ For dataset we took NewYork taxi (yellow taxi) rides data for 2022, which is siz
 This represents well the typical size of incremental data batch, which doesn't usually exceed several Gb.
 
 Source code for running the tests, execution logs and detailed results file you can find in [git repo](benchmark_test/README.md).
+Please don't consider this as a comprehesive test, but rather as a measurement for one particular (and also common) data
+processing scenario.
 
+How do we ran tests:
+1. We ran the same workload in three different setups for each service:
+  - 6 workers, no auto-scaling. Each worker size = 4 vCPU and 16 Gb memory (this is Standard Glue workers size. In EMR we set up worker size through job run configuration)
+  - 2 workers, no auto-scaling. Same worker size
+  - Auto-scaling. We let the service decide how to auto-scale, observing how it works using default settings.
+2. For each setup we executed 3 runs and gathering:
+  - job execution time (also we pay attention to "warm-up" time needed to provision running infrastructure)
+  - resource consumption relevant to billing (for Glue it is DPU-hours consumed, for EMR Serverless: vCPU-hours and memoryGb-hours).
 
-## Performance
+![Benchmark Test Results](img/benchmark_test_results.png)
 
-### NYC Taxi ride test
-- Test NYC Taxi convert
-- Test NYC Taxi filter
-  with 4 workers in Glue
-  and 16vCPU in EMR Serverless
-  <<todo run these tests>>
+[*] - prices are taken for us-east-1 region.  
+[**] - here we disregard cost of storage GB because: 1) our tests fit very well in 20Gb free of charge storage per worker, 2) additional Gb cost is $0.000111, which is negligible
 
-### Start-up times
+### Test takeaways
 
-- There's <<todo: check>> provisioned capacity for EMR serverless. But in this case objectively it's no longer a Serverless Technology
-
-## Cost
-
-- For smaller workloads EMR Serverless might be cheaper as you can start from 1 vCPU for super-small workload
-- Whereas in AWS Glue minimum number of workers is 2 (4 vCPU each) 
-
-
+1. Total cost of job runs where approximately 1.5 lower in EMR Serverless (among all configurations and runs)
+2. Job Execution time (here we consider billed time only, no warm-ups) was 1.2-1.6 times faster for EMR in no-auto-scale scenario and almost equal for auto-scaling.
+3. If we take "total completion time" (warm-up + execution) - it's almost equal for 6 workers setup, better for EMR in 2 workers scenario, and in Glue's favor for auto-scale.
+4. EMR Serverless job lifecycle contains the following state transitions: Pending (application start) -> Scheduled (resource provisioning) -> Running (actual execution)
+5. We calculated "scheduled" time as warm-up - i.e. time needed to provision infrastructure. "Pending" is only relevant for runs executed in EMR Serverless application after long pauses in between. Otherwise, it's negligible.
+6. We didn't use "preinitialized capacity" feature in EMR Serverless (as it would give this service the upperhand and 
+would make the test not-really serverless).
+7. Execution time varies between runs in the same setup. However, for EMR the difference between max and min execution time is in range of 1-2%, while for Glue it can variate up to 15%.
+8. In Glue testing script we used spark Data Frame functionality. We considered using Glue Dynamic Data Frame instead, but it didn't show any benefits (you can see this script results in "log_results" folder).
+9. Minimum billed time for vCPUHour is 1 minute. For shorter jobs, reported resources consumption might differ from actually billed resource consumption. For our test it was the case only for autoscale setup and the difference (as we checked manually in EMR Studio) was in a range of 1-2%, negligible.
 
 ## Conclusion
 
