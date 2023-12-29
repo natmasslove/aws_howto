@@ -2,36 +2,33 @@
 
 ## Introduction
 
-AWS provides a wide range of serverless technologies to run Big Data processing.
-Sometimes those services have similar goals and it's difficult to choose - which one suits your needs better.
-One good example is AWS Glue Jobs and EMR Serverless.
+AWS offers a wide range of serverless technologies for Big Data processing. Often, these services have overlapping functionalities, making it challenging to determine the best fit for your specific needs. A good example of this is the comparison between AWS Glue Jobs and EMR Serverless.
 
-In this article we:
-1. Cover some functional differences and service integrational aspects which might affect your choice
-2. Provide benchmark test results (representing on one of typical steps in incremental data workloads)
-3. Discuss scenarios where one technology or another could prevail
+In this article, we aim to:
+1. Highlight key functional differences and aspects of service integration that could influence your choice.
+2. Present results of a benchmark test that represents a typical scenario in incremental data workloads.
+3. Explore various scenarios where one technology may outperform the other.
 
-Disclaimer: in this article we focus on Glue Jobs specifically, paying less attention to other Glue capabilities whose purpose is not
-data processing specifically. Nevertheless, Data Catalog and Crawlers might be essential part of you Data Platform no matter which
-processing technology would you choose (Glue Jobs or EMR Serverless): they integrate with both very well.
+Disclaimer: AWS Glue offers a variety of tools, but our research here focuses on Glue Jobs because it's most relevant for the comparison with EMR Serverless.  
+Other AWS Glue components, like the Data Catalog and Crawlers can be vital part of any data plaform and, as we will explore later, they don't act as differentiators as they integrate smoothly with both Glue Jobs and EMR Serverless.
 
 ## Functional aspects
 
 ### Service Maturity
 
-**AWS Glue** was made generally available in 2017 (6 years ago - quite a long journey to these days standard) and got several major version upgrades making the service faster, more user-friendly and adding some additional capabilities.
+**AWS Glue** became generally available in 2017. Over the past six years, it has seen continuous improvement, marked by several major version upgrades that have enhanced the service, making it faster, more user-friendly, and expanding its capabilities.
 
-**EMR Serverless** became GA only in mid-2022, but I wouldn't call it worrysome, as it was built taking experience from classic EMR on EC2.
+**EMR Serverless**, on the other hand, was launched as generally available only in mid-2022. However, concerns about its relative newness are mitigated by the fact that it was developed using insights gained from the classic EMR on EC2.
 
-Both services have a very good documentation and, also, github repositories with samples where you can get loads of code examples and explore usage best practices: [aws-glue-samples](https://github.com/aws-samples/aws-glue-samples), [emr-serverless-samples](https://github.com/aws-samples/emr-serverless-samples)
+Both services have an extensive documentation and, also, github repositories with samples where you can get loads of code examples and explore usage best practices: [aws-glue-samples](https://github.com/aws-samples/aws-glue-samples), [emr-serverless-samples](https://github.com/aws-samples/emr-serverless-samples)
 
 ### Compatibility: Big Data Technology Stack
 
-**EMR Serverless**: you can run Spark (PySpark, Scala, JAVA, SparkR) and HIVE jobs (as of time of this writing. The list is likely to be expanded in future).  
-**AWS Glue**: support Spark only (PySpark and Scala scripts).  
-In Glue you can also run pure Python code cheaply (using just 0.0625 of standard workers capacity), but it's not a scope for this article.
+**EMR Serverless**: As of the time of this writing, EMR Serverless supports running Spark (PySpark, Scala, JAVA, SparkR) and HIVE jobs. The range of compatible technologies is likely to expand in the future.
 
-**Version upgrades**: EMR Serverless tends to be closer to the latest available Spark version as they declare 60 days interval to adopt newly released Spark versions while AWS Glue gets upgrades not that often.  
+**AWS Glue**: Primarily supports Spark (PySpark and Scala scripts). Additionally, AWS Glue offers the capability to run pure Python code efficiently, using only 0.0625 of the standard worker's capacity. However, this feature falls outside the scope of this article.
+
+**Version Upgrades**: EMR Serverless generally stays more up-to-date with the latest Spark versions, aiming to adopt new releases within a 60-day timeframe. In contrast, AWS Glue tends to receive updates less frequently.
 
 Current versions (as of 2023-12-29):  
 **EMR Serverless**: version 6.15.0 -> Apache Spark 3.4.1 [link](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/release-versions.html)
@@ -39,22 +36,19 @@ Current versions (as of 2023-12-29):
 
 ### Compatibility: Open-table formats
 
-It is easy to use both **EMR Serverless** and **Glue** to work with Open table formats (Hudi, Iceberg, Delta Lake).
+Both **EMR Serverless** and **AWS Glue** facilitate easy interaction with open table formats (Hudi, Iceberg, and Delta Lake).
 
-- In Glue you just provide job parameter (e.g. *"--datalake-formats":"iceberg"* and some minimal spark configuration)
-- In EMR-Serverless - you provide spark configuration options such as *spark.jars=/usr/lib/hudi/hudi-spark-bundle.jar*
+- In AWS Glue, simply add a job parameter (e.g. *"--datalake-formats":"iceberg"* and some minimal spark configuration)
+- For EMR Serverless, specify Spark configuration options, such as *spark.jars=/usr/lib/hudi/hudi-spark-bundle.jar*
 - Using Open Table format is very well documented for both services
 
-### Compatibility: AWS eco-system integration 
+### Compatibility: AWS ecosystem integration 
 
-Both services are tightly integrated with such **core AWS services** as IAM, VPC, CloudFormation etc.
-The same can be said for services typically used in data pipelines: S3 (not only for data, but for logs also), Data Catalog/Crawlers and many others.
-Specifically 
+Both services integrate seamlessly with **core AWS services** like IAM, VPC, CloudFormation, etc. This extends to services commonly used in data pipelines, such as S3 (for data storage and logging), Data Catalog/Crawlers, and many others.
 
-Database and orchestration tools integration we'll discuss a bit later.
+We'll discuss database and orchestration tool integration later in the article.
 
-**AWS Glue Data Catalog**, even though it's a part of AWS Glue service, integrates with EMR just as easy.  
-Providing this option for EMR serverless job run is sufficient (and it's a part of defaults as well):
+**AWS Glue Data Catalog**, while part of the AWS Glue service, integrates with EMR just as easily. For EMR Serverless jobs, configuring the following option is sufficient (and is included in the default settings):
 ```json
     "sparkSubmitParameters": {
         "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
@@ -66,7 +60,7 @@ Providing this option for EMR serverless job run is sufficient (and it's a part 
 1. Apache Airflow
 
 Airflow provides easy-to-use operators for both Glue and EMR Serverless Jobs.
-That's how running the job looks for EMR:
+Here's an example of how a EMR Serverless job can be run using Airflow:
 ```python
 from airflow.providers.amazon.aws.operators.emr import EmrServerlessStartJobOperator
 
@@ -83,13 +77,13 @@ from airflow.providers.amazon.aws.operators.emr import EmrServerlessStartJobOper
     )
 ```
 
-There are some additional operator when, for example in less common scenarios, you can create and tear-down the whole EMR Serverless application as well as running several jobs in between.
+There are some additional operators when, for example in less common scenarios, you can create and tear-down the whole EMR Serverless application as well as running several jobs in between.
 
 Both are equally well-integrated with Apache Airflow.
 
 2. Step Functions
 
-AWS-native orchestration service integrates with services in our scope very well and the implementation is done in similar way.
+AWS-native orchestration service integrates smoothly with both services in our scope and the implementation is done in similar ways.
 
 Defining State Machine task for Glue Job Run:
 ```json
@@ -103,17 +97,16 @@ Defining State Machine task for Glue Job Run:
     },
 ```
 
-You can run asynchronously or wait for job completion using ".sync".
+Jobs can be run asynchronously or set to wait for completion using ".sync".
 
-3. There's a native orchestration mechanism for Glue - Glue Workflows. Of course, it seamlessly integrates with Glue and not
-available for EMR Serverless.
-But as this option is less advanced than Airflow or Step Function, we wouldn't consider having it as a big advantage for Glue.
+3. AWS Glue also offers a native orchestration mechanism – Glue Workflows.  While this integrates seamlessly with Glue, it is not available for EMR Serverless. However, Glue Workflows are generally less advanced than Airflow or Step Functions, so their absence in EMR Serverless is not a significant disadvantage.
 
 ### Integration: Databases and data providers
 
 1. AWS Databases: Redshift, RDS, Aurora
 
-Typical approach in **EMR Serverless** (as well as in just plain PySpark) would be using JDBC:
+For **EMR Serverless** (as well as for just plain PySpark), the typical method for database integration is through JDBC.  
+Here’s an example of how you can connect to a database using PySpark:
 ```python
 from pyspark.sql import SparkSession
 
@@ -130,10 +123,10 @@ df = (
     .load()
 )
 ```
-And, of course, you will need to retrieve DB credentials first (most likely from Secrets Manager).
+And, of course, you will need to retrieve database credentials first (most likely from Secrets Manager).
 
-In **AWS Glue** you can use built-in mechanism of Glue Connections, where you define connection properties alongside with
-credentials (best practice is to reference pre-created secret). Then you can just like this:
+In contrast, **AWS Glue** simplifies database integration with its built-in Glue Connections where you define connection properties and credentials (ideally referencing a pre-created secret).  
+Database interaction using Glue Connection is very easy:
 
 ```python
 dynamic_frame_read = glueContext.create_dynamic_frame.from_options(
@@ -150,86 +143,84 @@ This, in our opinion, makes it easier to implement database integrations in AWS 
 
 2. Other common data stores
 
-There might be a requirement in your data platform to interact with third-party data stores. It might be SAP HANA, Snowflake,
-databases in Azure Cloud etc.
-AWS Glue provides out-of-the-box connectors for many data stores like these (and list is growing).
+Your data platform might need to interface with third-party data stores such as SAP HANA, Snowflake, or databases in Azure Cloud. **AWS Glue** offers ready-to-use connectors for many such data stores, and the list is constantly expanding.
 
-This saves your from hassle of picking correct JDBC driver, downloading it and integrating it into your job and, then, maintaining driver version etc. (which would be exactly EMR Serverless scenario for majority of data stores).
-
-AWS Glue takes an upperhand here as well.
+Using AWS Glue saves you the trouble of selecting and maintaining the correct JDBC driver, a process that is necessary in **EMR Serverless** for most third-party data stores. This ease of integration gives AWS Glue an advantage in scenarios involving diverse data sources.
 
 ## Observability
 
-AWS Glue got some nice additions lately, so it's fair to say that both services provide a very good set of capabilities to
-monitor job and investigate potentials bottlenecks/painpoints.
+Recently, AWS Glue has seen significant improvements in its observability features, bringing it on par with EMR Serverless in terms of capabilities for monitoring jobs and identifying potential bottlenecks or issues.
 
-**EMR Studio** provides Spark UI (for running jobs) and Spark History server (for completed ones) visualization for each job run you have.
-Alternatively, you can generate a job run's temporary URL for Spark UI dashboard using AWS SDK or CLI commands.
+**EMR Serverless** provides effective job monitoring tools. It includes the Spark UI for real-time tracking of running jobs and the Spark History Server for insights into completed ones. For convenience, monitoring can be done via EMR Studio UI or by generating a Spark UI dashboard URL for specific job runs using AWS SDK or CLI commands.
 
 ![EMR Serverless Spark UI](img/emrs_spark_ui.png)
 
-**AWS Glue** also provides sufficient capabilities in that regard. Even better, there were several recent improvement adding
-observability metrics and Spark UI:
+**AWS Glue** recent enhancements have introduced more observability metrics and access to the Spark UI, providing detailed insights into job performance.:
 
 ![Glue Spark UI and metrics](img/glue_observability.png)
 
 ### Service-Specific features
 
-AWS Glue provides several enhancements which might accelerate or ease the development process including:
-- Dynamic Data Frame which has some nice method for easier data reads/writes integrating with AWS Glue Connections and AWS Glue Data Catalog
-- Job bookmarks
+AWS Glue stands out with several unique features that can speed up and simplify the development process. These include:
+- Dynamic Data Frames offering convenient methods for data reads/writes, these frames integrate seamlessly with AWS Glue Connections and the AWS Glue Data Catalog.
+- Job bookmarks.
 
 From development perspective having those additions might be considered as an advantage for AWS Glue Jobs.
 
 ## Benchmark test
 
-The main purpose of this test was to compare services cost and performance. In other words, which one would be cheaper to
-process a portion of data and how the execution time compares.
+The primary goal of our benchmark test was to evaluate the cost-effectiveness and performance of AWS Glue Jobs versus EMR Serverless. Specifically, we aimed to determine which service is more economical for data processing and how their execution times compare.
 
-As a test workload we used a scenario where we take a S3-based csv dataset, perform data type conversion and save the data 
-into another S3 location. This could be considered as a simulation of one of the steps in batch processing (incremental load from raw to stage layer).
+We simulated a common batch processing step: loading data from "raw" to "stage" layer. Our test involved processing a ~4GB CSV dataset of New York taxi (yellow taxi) ride data from 2022, stored on S3. This dataset size is in typical range for incremental data batches (which is usually up to several GBs).  
+Workload includes reading data from S3, data type conversion and writing to a different S3 location in parquet format.
 
-For dataset we took NewYork taxi (yellow taxi) rides data for 2022, which is sized around 4Gb in csv format.
-This represents well the typical size of incremental data batch, which doesn't usually exceed several Gb.
+You can find the source code, execution logs, and detailed results of our test in our [GitHub repository](benchmark_test/README.md).    
+Note that this test represents a specific data processing scenario and is not intended as a comprehensive evaluation.
 
-Source code for running the tests, execution logs and detailed results file you can find in [git repo](benchmark_test/README.md).
-Please don't consider this as a comprehesive test, but rather as a measurement for one particular (and also common) data
-processing scenario.
+### Test Methodology
 
-How do we ran tests:
-1. We ran the same workload in three different setups for each service:
-  - 6 workers, no auto-scaling. Each worker size = 4 vCPU and 16 Gb memory (this is Standard Glue workers size. In EMR we set up worker size through job run configuration)
-  - 2 workers, no auto-scaling. Same worker size
+1. We ran the same workload under three different setups for each service:
+  - 6 workers, no auto-scaling, with each worker having 4 vCPU and 16 GB memory. (this is Standard Glue workers size. In EMR we set up worker size through job run configuration)
+  - 2 workers, no auto-scaling, with the same worker specifications
   - Auto-scaling. We let the service decide how to auto-scale, observing how it works using default settings.
-2. For each setup we executed 3 runs and gathering:
+2. We conducted three runs for each setup, measuring:
   - job execution time (also we pay attention to "warm-up" time needed to provision running infrastructure)
-  - resource consumption relevant to billing (for Glue it is DPU-hours consumed, for EMR Serverless: vCPU-hours and memoryGb-hours).
+  - resource consumption relevant to billing (DPU-hours for Glue and vCPU-hours and memoryGb-hours for EMR Serverless).
 
 ![Benchmark Test Results](img/benchmark_test_results.png)
 
 [*] - prices are taken for us-east-1 region.  
-[**] - here we disregard cost of storage GB because: 1) our tests fit very well in 20Gb free of charge storage per worker, 2) additional Gb cost is $0.000111, which is negligible
+[**] - here we include vCPU and memoryGb cost only, disregarding the cost of storageGB because: 1) our tests fit very well in 20Gb free of charge storage per worker, 2) additional Gb cost is $0.000111, which is negligible
 
 ### Test takeaways
 
-1. Total cost of job runs where approximately 1.5 lower in EMR Serverless (among all configurations and runs)
-2. Job Execution time (here we consider billed time only, no warm-ups) was 1.2-1.6 times faster for EMR in no-auto-scale scenario and almost equal for auto-scaling.
-3. If we take "total completion time" (warm-up + execution) - it's almost equal for 6 workers setup, better for EMR in 2 workers scenario, and in Glue's favor for auto-scale.
+1. EMR Serverless was approximately 1.5 times more cost-effective than AWS Glue across various configurations.
+2. In scenarios without auto-scaling, EMR Serverless was 1.2 to 1.6 times faster than Glue. With auto-scaling, the execution times were almost identical. Here we consider billed time only, no warm-ups.
+3. Total completion time (including warm-up and execution) was comparable for both services with 6 workers, faster for EMR with 2 workers, and in Glue’s favor with auto-scaling.
 4. EMR Serverless job lifecycle contains the following state transitions: Pending (application start) -> Scheduled (resource provisioning) -> Running (actual execution)
-5. We calculated "scheduled" time as warm-up - i.e. time needed to provision infrastructure. "Pending" is only relevant for runs executed in EMR Serverless application after long pauses in between. Otherwise, it's negligible.
-6. We didn't use "preinitialized capacity" feature in EMR Serverless (as it would give this service the upperhand and 
-would make the test not-really serverless).
-7. Execution time varies between runs in the same setup. However, for EMR the difference between max and min execution time is in range of 1-2%, while for Glue it can variate up to 15%.
-8. In Glue testing script we used spark Data Frame functionality. We considered using Glue Dynamic Data Frame instead, but it didn't show any benefits (you can see this script results in "log_results" folder).
-9. Minimum billed time for vCPUHour is 1 minute. For shorter jobs, reported resources consumption might differ from actually billed resource consumption. For our test it was the case only for autoscale setup and the difference (as we checked manually in EMR Studio) was in a range of 1-2%, negligible.
+5. We calculated "scheduled" time as warm-up - i.e. time needed to provision infrastructure. "Pending" is only relevant for runs executed in EMR Serverless application longer periods of inactivity. Otherwise, it's negligible.
+6. We didn't use "preinitialized capacity" feature in EMR Serverless to maintain an apples-to-apples comparison.
+7. Variability in execution times from one run to another in the same setup was more pronounced in Glue, with up to a 15% difference, whereas EMR Serverless showed a tighter range of 1-2%.
+8. In Glue testing script we used spark Data Frame functionality. We considered using Glue Dynamic Data Frame instead, but it didn't show any benefits in this scenario (you can see this script results in "log_results" folder).
+9. Minimum billed time for EMR vCPUHour is 1 minute. For shorter jobs, reported resources consumption might differ from actually billed resource consumption. For our test it was the case only for autoscale setup and the difference (as we checked manually in EMR Studio) was in a range of 1-2%, negligible.
 
 ## Conclusion
 
-<<todo>>
-There are several scenarios when you can prefer using EMR serverless:
-- You intend to use something apart from PySpark
-- You are migrating existing Big Data codebase into serverless platform. So even you PySpark jobs require less changes (adding GlueContext; parsing parameters using awsglue.utils getResolvedOptions etc.)
-- Your workload elements tend to be small (e.g. 1 job just processing several gigabytes of data per run), so you can allocate less capacity
-- Scenario: close to "lift-and-shift" migration scenario from EMR or Hadoop cluster
+In our exploration of AWS Glue Jobs and EMR Serverless, we've closely examined their functionality, integration capabilities, cost-effectiveness, and performance.  
+Based on our benchmark tests and observations, here are some key takeaways:
 
-btw, if you are planning migration from existing EMR to EMR serverless, you might want to consider using EMR serverless cost estimator. [https://aws.amazon.com/blogs/big-data/amazon-emr-serverless-cost-estimator/]
+
+**Cost-Effectiveness**: The tests indicate that EMR Serverless could be more cost-effective in certain scenarios. This aligns with current AWS pricing (please note, we use the current prices, while they can change in future):
+
+- AWS Glue is priced at **$0.44** per DPU-hour (4 vCPU + 16 Gb RAM)
+- EMR pricing is $0.052624 per vCPU per hour and $0.0057785 per GB per hour. So, for "4 vCPU + 16 Gb RAM" configuration the price tag is **$0.30**.
+- Further savings may be possible with EMR's Linux/ARM workers, although compatibility with specific workloads should be tested.
+
+**Performance**: When evaluating performance, it's crucial to consider both execution and warm-up times. For EMR Serverless, scheduling time may impact time-sensitive workloads. The preinitialized capacity feature can mitigate this but requires balancing cost against performance.
+
+**Integration and Usability**: Both services offer robust integration with AWS services, but AWS Glue's built-in connections provide an edge in simplicity and ease of setup, particularly for data stores integrations.
+
+**Potential use-cases**:
+If you are considering moving your on-premises Hadoop or EMR-on-EC2 cluster to a serverless platform, EMR Serverless presents a viable option, potentially enabling a smooth, close to "lift-and-shift" migration.
+
+Conversely, for smaller projects with intensive data integrations involving diverse sources like SAP HANA or Snowflake, AWS Glue Jobs may be preferable due to lower development efforts.
