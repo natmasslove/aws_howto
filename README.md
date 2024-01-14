@@ -22,5 +22,7 @@ Here I put small "projects" where I either explore new functionalities or create
 * [How Athena works with INSERT INTO commands for various table formats](hands_dirty/20230712_testing_athena_insert/README.md)
 * [Timestream samples and research](hands_dirty/timestream_samples/README.md)
 * [EMR Serverless samples](hands_dirty/emr_serverless_sample/README.md)
+* [Step Function Sample CDK Code - running tasks consecutively/in parallel](hands_dirty/step_functions_dynamic_tasks/README.md)
 
 
+ 
