@@ -2,7 +2,7 @@
 # Monitoring Data Pipelines on AWS. Part 1: Specifics, challenges and AWS Toolset
 
 In this two-part article we are going to cover several aspects in regard of monitoring data pipelines running on AWS:
-1. How monitoring data pipelines is different from any generic observability tools?
+1. How monitoring data pipelines is different from any general-purpose observability tools?
 2. What are typical goals of this kind of observability systems? 
 3. What are the common challenges we face when building such system?
 4. AWS tools and services useful for this purpose
@@ -45,6 +45,40 @@ So, centralized platform should be capable of handling events in variety of serv
 
 ## AWS Tools and Services
 
-In this section let's take a look at AWS Services available for us to build monitoring platform, their typical use-cases, pros and cons.
+In this section let's take a look at some AWS Services which can be useful when building the monitoring platform, their typical use-cases, pros and cons.
 
-### Amazon EventBridge
+### Triggering Alerts: Amazon EventBridge
+You can set up EventBridge Rules to react on certain AWS events in your account and send those events to a target (where you can process those and send notifications).  
+The service provides extensive capabilities for filtering relevant events. For example, you can catch event only from "glue" service with event type "Glue Job State Change" when the target state means "something went wrong".  
+Additionally, you can limit the scope of the rule to glue jobs only relevant for your needs (see example below).
+
+```yaml
+      EventPattern:
+        source:
+          - aws.glue
+        detail-type:
+          - Glue Job State Change
+        detail:
+          state:
+            - FAILED
+            - ERROR
+            - STOPPED
+          jobName:
+            - prefix: glue-myproject
+```
+
+AWS lets you choose from a variety of services to be a target of this event.  
+For our purpose the following seems to be most useful:
+- SNS topic - if you just want to send event "as is" to alerts recipients
+- SQS queue or Lambda function - if you want to apply additional processing (formatting, beautification for better readility. Maybe enriching the message adding more details).
+
+We found this to be a very nice and efficient way of catching failure. Easy to setup and flexible.
+
+Unfortunately not all services are supported (at time of this writing). For example, you can't catch Glue Workflow or Lambda function failures.
+And of course, it takes additional effort to start handling events from another AWS account.
+
+### Catching Lambda Failures: Lambda Destinations
+
+
+- Works in async
+- Requires Lambda function configuration changes
