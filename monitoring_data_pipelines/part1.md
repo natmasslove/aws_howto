@@ -79,6 +79,84 @@ And of course, it takes additional effort to start handling events from another 
 
 ### Catching Lambda Failures: Lambda Destinations
 
+Configuring Lambda Destinations is a great way to get notifications on Lambda failure.
+When function fails, it sends an event to the target of your choice (currently available options are SNS, SQS, Lambda and Eventbridge).
 
-- Works in async
-- Requires Lambda function configuration changes
+![Lambda Destinations Configuration](img/lambda_destinations.png)
+
+There are several downsides:
+- it only works when lambda is invoked asynchronously
+- it requires Lambda function configuration changes (which, as we discussed in "Challenges" section, not always possible).
+
+### Notifications: AWS SNS vs AWS SES
+
+When monitoring system identifies failure, it's time to send a notification to relevant recipients.
+
+The first candidate service for this is AWS SNS. It's easy to set up and integrates very well with AWS services
+(for example, if you set up EventBridge rule (see above), it's a matter of 1 click to set up an SNS Topic as destination).
+All topic's subscribers will get the notification. The problem is that notification itself looks like a big chunk of JSON and
+desperately lacks readability.
+
+It would be nice to have a formatted message, which outlines the most important aspects of what has happened, making operation team life easier.
+
+One option here is to use the combination of AWS Lambda and SES (which is capable of sending nice HTML e-mails).
+You can choose processing Lambda as event target, do some parsing/formatting in Lambda and, then, call SES to deliver the notification.
+
+Generally speaking, when you use processing lambda function as a target, you can send notification in differen ways: to Slack or MS Teams channels etc., but this requires additional efforts for integrations.
+
+### Historical analysis: Cloudwatch LogInsights
+
+AWS services accumulate their logs in CloudWatch and you can use LogInsight tools to query these events in nice, intuitive manner.
+For example, that's how you can identify the history of errors of a certain Lambda function:
+
+![CloudWatch LogInsights](img/log_insights.png)
+
+However, for some other services, unlike AWS Lambda, it might require additional coding efforts to store sufficient information about errors (or events in general).
+
+Also, we need to keep in mind, AWS charges based on volume of data (cloudwatch logs) scanned.
+
+### Gathering execution metrics: AWS SDK, AWS CLI
+
+Apart from getting on-failure notification, you might want to collect some execution metrics for future analysis.
+For example, you want to gather daily Glue Job running time and DPU-hours consumed.
+AWS provides an access to this information over the API, which you can call either using AWS CLI or via AWS SDK.
+
+Here's an example code to extract Glue Job execution time (simplified for demo purposes):
+```python
+import boto3
+
+def get_glue_job_execution_times(job_name):
+    client = boto3.client('glue')
+
+    response = client.get_job_runs(JobName=job_name)
+    job_runs = response.get('JobRuns', [])
+
+    execution_times = []
+
+    for run in job_runs:
+        execution_time = run.get('ExecutionTime')
+        if execution_time: # only for completed runs
+            execution_times.append({
+                'RunId': run.get('Id'),
+                'ExecutionTime': execution_time
+            })
+
+    return execution_times
+
+if __name__ == "__main__":
+    job_name = 'glue-salmonts-sparkjob-one-dev'
+    execution_times = get_glue_job_execution_times(job_name)
+    for run in execution_times:
+        print(f"RunId: {run['RunId']}, ExecutionTime: {run['ExecutionTime']}")
+```
+
+
+
+
+
+## What's next
+
+In the next part we discuss how we built an open-source solution on top of aforementioned (and other) AWS services to 
+meet the goals and address challenges I mentioned in this part.
+
+Stay tuned!
