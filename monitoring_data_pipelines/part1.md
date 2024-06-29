@@ -16,6 +16,10 @@ When we think about "typical" monitoring system, the first thing comes to mind i
 In the domain of Data Pipelines, observations are done on a more "discrete" level. We focus more on pipeline steps - whether they have completed successfully or failed, and whether they met their SLAs, among other factors.
 This requires a slightly different approach and, consequently, a different toolset.
 
+Additionally, the set of metrics we may want to collect is also dictated by the "discrete" nature of observing data pipelines.  
+There are obvious metrics such as "execution time" of each pipeline step.  
+However, it's equally important to collect "extended" metrics. For example, DPU-hours consumed by a Glue job is a crucial one. A Glue job might fit within the expected execution timeframe but consume significantly more resources if Spark autoscaling spins up additional workers. Therefore, having those extended metrics might help ensure efficient resource utilization and cost management.
+
 ## Goals of monitoring
 
 1. Ensure all pipelines are running smoothly with minimal time and effort required from the operations team.
@@ -51,7 +55,9 @@ The centralized platform should be capable of handling events from a variety of 
 In this section, let's take a look at some AWS Services which can be useful when building the monitoring platform, their typical use cases, pros and cons.
 
 ### Triggering Alerts: Amazon EventBridge
-You can set up EventBridge Rules to react on certain AWS events in your account and send those events to a target, where you can process those and send notifications.  
+AWS EventBridge is an event-driven service that fits very well in scenarios where you need to detect events from AWS resources.  
+The default out-of-the-box EventBus receives events from a majority of AWS services.  
+Therefore, you can set up EventBridge Rules to react to certain AWS events in your account and send those events to a target, where you can process those and send notifications.  
 The service provides extensive capabilities for filtering relevant events. For example, you can catch event only from the "glue" service with the event type "Glue Job State Change" when the target state indicates "something went wrong".  
 Additionally, you can limit the scope of the rule to glue jobs only relevant to your needs (see the example below).
 
