@@ -1,6 +1,6 @@
 name: AWS CLI Demo
 run-name: aws cli demo -> ${{ github.actor }}
-on: push
+on: workflow_dispatch
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
