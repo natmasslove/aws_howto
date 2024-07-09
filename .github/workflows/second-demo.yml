@@ -1,6 +1,6 @@
 name: Second Demo
 run-name: running second demo -> ${{ github.actor }}
-on: push
+on: workflow_dispatch
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
