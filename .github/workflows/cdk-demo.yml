@@ -10,5 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: aws sts get-caller-identity      
-      - run: aws s3 ls
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: ls
+      - run: cd ${{ github.repository }}
+      - run: ls
 
