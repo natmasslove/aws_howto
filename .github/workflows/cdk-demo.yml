@@ -25,6 +25,10 @@ jobs:
         #   node-version: 16
         #   cache: "npm"
 
+      - run: npm --version        
+      - run: node --version
+
+
       # - name: Install dependencies
       #   run: npm install
 
