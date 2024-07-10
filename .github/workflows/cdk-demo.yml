@@ -27,6 +27,7 @@ jobs:
 
       - run: npm --version        
       - run: node --version
+      - run: python --version
 
 
       # - name: Install dependencies
