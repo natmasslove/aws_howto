@@ -9,31 +9,28 @@ jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
-      - run: aws sts get-caller-identity      
-      - run: ls
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: ls
-      - run: |
-          cd handson
-          ls
-      - run: ls
 
-      - name: Setup Node.js environment
+      - name: Setup Node.js env
         uses: actions/setup-node@v4
         with:
           node-version: 20
-        #   cache: "npm"
+      
+      - name: npm install aws-cdk
+        run: npm i -g aws-cdk
 
-      - run: npm --version        
-      - run: node --version
-      - run: python --version
 
-      - run: |
-          cd handson/github_actions_cdk
-          npm i -g aws-cdk
+      - name: install python requirements
+        run: |
+          cd handson/github_actions_cdk          
           pip3 install -r requirements.txt
 
+      - name: test cdk
+        run: cdk --version
+
+      - name: CDK deploy
+        run: cdk deploy
 
 
 
@@ -42,3 +39,10 @@ jobs:
 
       # - name: Install AWS CDK
       #   run: npm i -g aws-cdk      
+
+      # - run: aws sts get-caller-identity      
+      # - run: ls
+
+      # - run: npm --version        
+      # - run: node --version
+      # - run: python --version
