@@ -27,9 +27,6 @@ jobs:
           cd ${{ env.CDK_APP_FOLDER }}
           pip3 install -r requirements.txt
 
-      - name: test cdk
-        run: cdk --version
-
       - name: CDK deploy
         run: |
           cd ${{ env.CDK_APP_FOLDER }}
