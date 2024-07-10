@@ -29,6 +29,13 @@ jobs:
       - run: node --version
       - run: python --version
 
+      - run: |
+          cd handson/github_actions_cdk
+          npm i -g aws-cdk
+          pip3 install -r requirements.txt
+
+
+
 
       # - name: Install dependencies
       #   run: npm install
