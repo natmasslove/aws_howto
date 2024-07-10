@@ -30,12 +30,12 @@ jobs:
       - name: CDK deploy
         run: |
           cd ${{ env.CDK_APP_FOLDER }}
-          cdk deploy
+          cdk deploy --require-approval never
 
       - name: CDK destroy
         run: |
           cd ${{ env.CDK_APP_FOLDER }}
-          cdk destroy
+          cdk destroy --force
 
       # - name: Install dependencies
       #   run: npm install
