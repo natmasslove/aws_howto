@@ -1,58 +1,52 @@
+# Setting Up your GitHub action workflows to deploy AWS CDK projects
 
-# Welcome to your CDK Python project!
+## Prerequisites and goals
 
-This is a blank project for CDK development with Python.
+There is a simple AWS CDK (Python) project which creates just one resource (SSM Parameter).
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+In order to go through this example you should:
+- Have AWS account
+- Be able to create IAM user in this account
+- Have a github repo (you should be able to create secrets in this repo)
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+Goal:
+- To create a pipeline which can deploy / destroy AWS CDK projects' resources
 
-To manually create a virtualenv on MacOS and Linux:
+## Preparation
 
+### IAM User
+1. Create IAM user (let's call it github_service_user)
+2. Add the following permissions for the user (the simplest is to create inline policy):
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sts:AssumeRole"
+            ],
+            "Resource": [
+                "arn:aws:iam::*:role/cdk-*-deploy-role-*",
+                "arn:aws:iam::*:role/cdk-*-file-publishing-role-*"
+            ]
+        }
+    ]
+}
 ```
-$ python -m venv .venv
-```
+These are minimal permission that worked.
+3. Generate ACCESS_KEYs for the user (note those down)
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
+### AWS Credentials in GitHub repo
+1. In your GitHub repo browse to: Settings -> Secrets & variables.
+2. Create to repository secrets:
+   - Name "AWS_ACCESS_KEY_ID", put IAM user's AWS_ACCESS_KEY_ID value here
+   - "AWS_SECRET_ACCESS_KEY" and IAM user's AWS_SECRET_ACCESS_KEY
 
-```
-$ source .venv/bin/activate
-```
+### Create workflow
+1. In your GitHub repo create a folder ".github/workflows".
+2. Put .yml/.yaml file inside this folder.
+3. Sample YAML file which prepares CDK environment and runs DEPLOY & DESTROY commands for the sample CDK project - github-actions-demo.yml in this folder. 
 
-If you are a Windows platform, you would activate the virtualenv like this:
 
-```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
-```
-
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
-
-## Useful commands
-
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
-
-Enjoy!
