@@ -32,7 +32,10 @@ jobs:
           cd ${{ env.CDK_APP_FOLDER }}
           cdk deploy
 
-
+      - name: CDK destroy
+        run: |
+          cd ${{ env.CDK_APP_FOLDER }}
+          cdk destroy
 
       # - name: Install dependencies
       #   run: npm install
