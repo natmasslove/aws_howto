@@ -1,0 +1,38 @@
+name: CDK Demo
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: 'us-east-1'
+  CDK_APP_FOLDER: handson/github_actions_cdk
+run-name: CDK demo -> ${{ github.actor }}
+on: [workflow_dispatch]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js env
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: npm install aws-cdk
+        run: npm i -g aws-cdk
+
+
+      - name: install python requirements
+        run: |
+          cd ${{ env.CDK_APP_FOLDER }}
+          pip3 install -r requirements.txt
+
+      - name: CDK deploy
+        run: |
+          cd ${{ env.CDK_APP_FOLDER }}
+          cdk deploy --require-approval never
+
+      - name: CDK destroy
+        run: |
+          cd ${{ env.CDK_APP_FOLDER }}
+          cdk destroy --force
