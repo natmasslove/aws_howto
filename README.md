@@ -13,7 +13,7 @@ Here I wanted to provide solutions which you can easily take and adjust for your
 * [How to setup and use connections and variables in AWS managed Apache Airflow](mwaa_connections_and_vars/README.md)
 * [How to accelerate your Glue Job development with Glue Interactive Sessions](glue_interactive_sessions/README.md)
 
-# Getting-Hands-Dirty section:
+# Hands-On section:
 
 Here I put small "projects" where I either explore new functionalities or create snippets to be re-used by "future myself" (or anyone else, of course 😃 )
 
@@ -23,6 +23,7 @@ Here I put small "projects" where I either explore new functionalities or create
 * [Timestream samples and research](handson/timestream_samples/README.md)
 * [EMR Serverless samples](handson/emr_serverless_sample/README.md)
 * [Step Function Sample CDK Code - running tasks consecutively/in parallel](handson/step_functions_dynamic_tasks/README.md)
+* [Deploy CDK Stacks inside GitHub Actions](handson/github_actions_cdk/README.md)
 
 
  
