@@ -13,7 +13,7 @@ Here I wanted to provide solutions which you can easily take and adjust for your
 * [How to setup and use connections and variables in AWS managed Apache Airflow](mwaa_connections_and_vars/README.md)
 * [How to accelerate your Glue Job development with Glue Interactive Sessions](glue_interactive_sessions/README.md)
 
-# Hand-On section:
+# Hands-On section:
 
 Here I put small "projects" where I either explore new functionalities or create snippets to be re-used by "future myself" (or anyone else, of course 😃 )
 
