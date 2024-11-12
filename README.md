@@ -25,6 +25,7 @@ Here I put small "projects" where I either explore new functionalities or create
 * [Step Function Sample CDK Code - running tasks consecutively/in parallel](handson/step_functions_dynamic_tasks/README.md)
 * [Deploy CDK Stacks inside GitHub Actions](handson/github_actions_cdk/README.md)
 * [Invoke Lambda Function as a Custom Resource in AWS CDK Stack](handson/cdk_invoke_lambda/README.md)
+* [Tag-based policies](handson/tag_based_policies/README.md)
 
 
  
