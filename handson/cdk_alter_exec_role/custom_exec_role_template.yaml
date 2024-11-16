@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  CdkDeployPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: policy-custom-cdk-exec-policy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - ssm:PutParameter
+              - ssm:GetParameter
+              - ssm:GetParameters
+              - ssm:DeleteParameter
+              - ssm:DescribeParameters
+              - ssm:ListTagsForResource
+              - ssm:AddTagsToResource
+              - ssm:RemoveTagsFromResource
+            Resource: "*"
+          # this sometime might be needed implicitly (e.g. when you create resources, <resource_type>:* permissions
+          # might not be sufficient, as they create log groups under the hood and there's no explicit error when
+          # createLogGroup permissions are absent)
+          # - Effect: Allow
+          #   Action:
+          #     - logs:CreateLogGroup
+          #     - logs:PutRetentionPolicy
+          #     - logs:DeleteLogGroup
+          #   Resource: "*"
+
+Outputs:
+  PolicyArn:
+    Description: "The ARN of the IAM Policy"
+    Value: !Ref CdkDeployPolicy
