@@ -27,5 +27,6 @@ Here I put small "projects" where I either explore new functionalities or create
 * [Invoke Lambda Function as a Custom Resource in AWS CDK Stack](handson/cdk_invoke_lambda/README.md)
 * [Using custom cloudformation execution policy in AWS CDK](handson/cdk_alter_exec_role/README.md)
 * [Tag-based policies](handson/tag_based_policies/README.md)
+* [CDK Example of Creating Aurora PostgreSQL serverless V2 cluster](/handson/cdk_aurora_cluster/README.md)
 
  
