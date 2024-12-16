@@ -25,13 +25,7 @@ jobs:
           role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-    #   # Step 3: Install AWS CLI
-    #   - name: Install AWS CLI
-    #     run: |
-    #       sudo apt-get update
-    #       sudo apt-get install -y awscli
-
-      # Step 4: List Parameters in SSM
+      # Step 3: List Parameters in SSM
       - name: List SSM Parameters
         id: list-parameters
         run: |

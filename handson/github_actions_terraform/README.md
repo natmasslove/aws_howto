@@ -22,6 +22,10 @@ Note: project and stage and used only as a part of role's and policy's name (to 
 
 This creates IAM Role. Please note the IAM Role's arn in outputs.
 
-5. Create a secret name "IAM_ROLE_ARN" at GitHub.com (your repository page) and put ARN from output as a value.
+5. Create secrets in your GitHub repo:
+   1. "IAM_ROLE_ARN", put ARN from output as a value.
+   2. "AWS_REGION", assign the region where you want github workflows to operate.
+
+
 
 
