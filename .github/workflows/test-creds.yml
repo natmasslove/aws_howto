@@ -1,0 +1,31 @@
+name: List SSM Parameters
+
+on:
+  workflow_dispatch: # Trigger manually
+
+permissions:
+  id-token: write # Required for OIDC authentication
+  contents: read # Required for repo access
+
+jobs:
+  list-ssm-parameters:
+    name: List SSM Parameters
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Configure AWS Credentials using OIDC
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Step 3: List Parameters in SSM
+      - name: List SSM Parameters
+        id: list-parameters
+        run: |
+          aws ssm describe-parameters --query "Parameters[*].[Name,Type]" --output table
