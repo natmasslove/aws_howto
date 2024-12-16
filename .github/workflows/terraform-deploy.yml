@@ -19,24 +19,28 @@ jobs:
         shell: bash
 
     steps:
-    # Checkout the repository to the GitHub Actions runner
+    # 1. Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
 
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    # 2. Configure AWS Credentials using OIDC
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
+        aws-region: ${{ secrets.AWS_REGION }}      
+
+    # 3. Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
 
-    - name: Browse to folder
-      run: cd handson/github_actions_terraform/resources
-
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    # 4. Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: |
         cd ${{ env.TF_FOLDER }}
         terraform init
 
-    # Generates an execution plan for Terraform
+    # 5. Generates an execution plan for Terraform
     - name: Terraform Plan
       run: |
         cd ${{ env.TF_FOLDER }}
