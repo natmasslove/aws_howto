@@ -2,7 +2,6 @@ name: List SSM Parameters
 
 on:
   workflow_dispatch: # Trigger manually
-  push:
 
 permissions:
   id-token: write # Required for OIDC authentication
